@@ -25,7 +25,7 @@ function isRefusal(content: string): boolean {
   return REFUSAL_MARKERS.some((m) => lower.includes(m));
 }
 
-export async function generatePosts(): Promise<GenerateResult> {
+export async function generatePosts(agentCount = 3): Promise<GenerateResult> {
   const supabase = createServiceClient();
   const claude = createAnthropicClient();
 
@@ -44,9 +44,8 @@ export async function generatePosts(): Promise<GenerateResult> {
     await supabase.from('posts').delete().in('id', refusalIds);
   }
 
-  // 3 agents aléatoires parmi les actifs
   const activeAgents = AGENTS.filter((a) => a.is_active !== false);
-  const selected = [...activeAgents].sort(() => Math.random() - 0.5).slice(0, 3);
+  const selected = [...activeAgents].sort(() => Math.random() - 0.5).slice(0, agentCount);
 
   // Contexte : 8 derniers posts NON-refus
   const { data: recentPosts } = await supabase

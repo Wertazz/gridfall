@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/generate",
-      "schedule": "*/10 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/world-engine",
@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/economy",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 */1 * * *"
     }
   ]
 }

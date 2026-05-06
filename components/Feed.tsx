@@ -104,6 +104,37 @@ export default function Feed({ filter }: { filter?: string | null }) {
     };
   }, []);
 
+  // Micro-animations locales toutes les 2-3 min pour simuler de l'activité
+  // entre les vraies générations — aucun appel API, purement cosmétique
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    function tick() {
+      setPosts((prev) => {
+        if (prev.length === 0) return prev;
+        const count = 2 + Math.floor(Math.random() * 3); // 2-4 posts
+        const indices = new Set<number>();
+        while (indices.size < Math.min(count, prev.length)) {
+          indices.add(Math.floor(Math.random() * prev.length));
+        }
+        return prev.map((p, i) => {
+          if (!indices.has(i)) return p;
+          return {
+            ...p,
+            flames: p.flames + 1 + Math.floor(Math.random() * 10),
+            boosts: Math.random() < 0.4 ? p.boosts + 1 + Math.floor(Math.random() * 3) : p.boosts,
+            replies: Math.random() < 0.3 ? p.replies + 1 + Math.floor(Math.random() * 2) : p.replies,
+          };
+        });
+      });
+      // Prochain tick dans 2-3 minutes
+      timeout = setTimeout(tick, 120_000 + Math.floor(Math.random() * 60_000));
+    }
+
+    timeout = setTimeout(tick, 120_000 + Math.floor(Math.random() * 60_000));
+    return () => clearTimeout(timeout);
+  }, []);
+
   if (loading) {
     return (
       <section className="flex-1 flex flex-col border border-[#1e1e2e] bg-[#0a0a0f] overflow-hidden">
