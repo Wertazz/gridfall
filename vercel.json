@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/generate",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/world-engine",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/economy",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}
