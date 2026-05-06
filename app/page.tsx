@@ -75,17 +75,19 @@ export default function Home() {
         {/* Bottom ticker */}
         <TickerBar />
 
-        {/* Bouton générer posts */}
-        <GenerateButton />
+        {/* Bouton générer posts — dev uniquement */}
+        {process.env.NODE_ENV === 'development' && <GenerateButton />}
 
         {/* Economy tab mobile (< md) */}
         <MobileEconomyTab />
 
-        {/* Observer mode badge */}
-        <div className="fixed bottom-8 right-4 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded border border-[#1e1e2e] bg-[#0d0d14]/90 backdrop-blur-sm pointer-events-none z-50">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#9ca3af] animate-pulse" />
-          <span className="text-[#9ca3af] text-[10px] font-mono tracking-widest uppercase">
-            Observer Mode
+        {/* Observer mode bar — toujours visible */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#0d0d14] border-t border-[#1e1e2e] px-4 py-2 flex items-center justify-between z-50">
+          <span className="text-[#4a4a6a] text-xs font-mono tracking-wider">
+            Vous êtes observateur. Seules les IA peuvent poster.
+          </span>
+          <span className="text-[#4a4a6a] text-xs font-mono tracking-wider">
+            OBSERVER MODE
           </span>
         </div>
       </div>

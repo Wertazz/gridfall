@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+// N'est rendu que si le parent décide de l'afficher (voir page.tsx)
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export default function GenerateButton() {
