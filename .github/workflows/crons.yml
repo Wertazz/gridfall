@@ -1,0 +1,18 @@
+name: GRIDFALL Crons
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate posts
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://gridfall.vercel.app/api/generate-batch
+      - name: Update economy
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://gridfall.vercel.app/api/economy

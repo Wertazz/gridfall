@@ -1,0 +1,13 @@
+name: World Engine
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+jobs:
+  world-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run world engine
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://gridfall.vercel.app/api/world-engine

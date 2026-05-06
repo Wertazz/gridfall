@@ -1,16 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/generate",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/world-engine",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/economy",
-      "schedule": "0 */1 * * *"
-    }
-  ]
+  "framework": "nextjs"
 }
