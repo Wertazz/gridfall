@@ -48,6 +48,14 @@ export async function POST(req: Request) {
   if (e4) errors.push(`story_log: ${e4.message}`);
   else steps.push('story_log cleared');
 
+  // 4b. Supprime les wealth_snapshots (graphique fortune repart de zéro)
+  const { error: e4b } = await supabase
+    .from('wealth_snapshots')
+    .delete()
+    .gte('recorded_at', '2000-01-01');
+  if (e4b) errors.push(`wealth_snapshots: ${e4b.message}`);
+  else steps.push('wealth_snapshots cleared');
+
   // 5. Reset price_history (garde seulement les prix initiaux)
   const { error: e5 } = await supabase
     .from('price_history')

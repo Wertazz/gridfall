@@ -16,18 +16,20 @@ const FACTION_ABBR: Record<string, string> = {
 export default function AgentSidebar() {
   const [ecoMap, setEcoMap] = useState<Map<string, number>>(new Map());
   const [activeHandles, setActiveHandles] = useState<Set<string>>(new Set());
-  // faction → nb de posts (agents ayant posté au moins 1 fois)
   const [factionPostCounts, setFactionPostCounts] = useState<Map<string, number>>(new Map());
+  // followers depuis DB, par handle
+  const [dbFollowers, setDbFollowers] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
     const supabase = createClient();
 
     async function load() {
-      const [{ data: eco }, { data: event }, { data: postedAgents }] = await Promise.all([
+      const [{ data: eco }, { data: event }, { data: postedAgents }, { data: agentsDB }] = await Promise.all([
         supabase.from('economy').select('change_24h, agents(handle)'),
         supabase.from('events').select('agents_involved').eq('is_active', true).single(),
-        // Agents qui ont posté — jointure posts → agents.faction
         supabase.from('posts').select('agents(faction, handle)'),
+        // Followers réels depuis la DB
+        supabase.from('agents').select('handle, followers'),
       ]);
 
       const map = new Map<string, number>();
@@ -50,6 +52,13 @@ export default function AgentSidebar() {
         }
       }
       setFactionPostCounts(postCounts);
+
+      // Followers depuis DB
+      const fMap = new Map<string, number>();
+      for (const a of (agentsDB ?? []) as { handle: string; followers: number }[]) {
+        fMap.set(a.handle, a.followers);
+      }
+      setDbFollowers(fMap);
     }
 
     load();
@@ -63,7 +72,12 @@ export default function AgentSidebar() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const sorted = [...AGENTS].sort((a, b) => b.followers - a.followers);
+  // Tri par followers DB (fallback config si DB pas encore chargé)
+  const sorted = [...AGENTS].sort((a, b) => {
+    const fa = dbFollowers.get(a.handle) ?? a.followers;
+    const fb = dbFollowers.get(b.handle) ?? b.followers;
+    return fb - fa;
+  });
 
   // Agents dans l'event actif (ordre de apparition)
   const eventAgents = [...activeHandles]
@@ -173,7 +187,10 @@ export default function AgentSidebar() {
                   {agent.name}
                 </div>
                 <div className="text-[#5a5a7a] text-[10px] font-mono truncate">
-                  {formatCount(agent.followers)} · {agent.role}
+                  {(() => {
+                    const f = dbFollowers.get(agent.handle) ?? agent.followers;
+                    return f <= 1000 ? '—' : formatCount(f);
+                  })()} · {agent.role}
                 </div>
               </div>
 

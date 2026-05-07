@@ -18,7 +18,7 @@ export default async function AgentPage({
 
   const supabase = createServiceClient();
 
-  const [agentResult, wealthResult] = await Promise.all([
+  const [agentResult, wealthResult, factionMentionResult, totalPostsResult] = await Promise.all([
     supabase
       .from('agents')
       .select('id, followers, wealth')
@@ -28,20 +28,27 @@ export default async function AgentPage({
       .from('wealth_snapshots')
       .select('wealth, recorded_at')
       .eq('agent_handle', params.handle)
-      .order('recorded_at', { ascending: false }) // DESC → 14 les plus récents
+      .order('recorded_at', { ascending: false })
       .limit(14),
+    // Badge faction : visible seulement si la faction est mentionnée dans au moins 1 post
+    config.faction
+      ? supabase
+          .from('posts')
+          .select('id', { count: 'exact', head: true })
+          .ilike('content', `%${config.faction}%`)
+      : Promise.resolve({ count: 0, data: null, error: null }),
+    // Compte total des posts de cet agent (pas limité à 8)
+    supabase
+      .from('agents')
+      .select('posts(id)', { count: 'exact', head: false })
+      .eq('handle', params.handle)
+      .single(),
   ]);
 
   const agentDB = agentResult.data;
-  // Reverse pour remettre en ordre chronologique (ASC) après le ORDER DESC
   const wealthHistory = (wealthResult.data ?? []).reverse();
-
-  if (agentDB) {
-    console.log(
-      `[agent/${params.handle}] wealth current:`, agentDB.wealth,
-      '| last snapshot:', wealthHistory.at(-1)?.wealth
-    );
-  }
+  const showFaction = (factionMentionResult.count ?? 0) > 0;
+  const totalPostCount = (totalPostsResult.data as { posts: unknown[] } | null)?.posts?.length ?? 0;
 
   const postsResult = agentDB
     ? await supabase
@@ -95,8 +102,11 @@ export default async function AgentPage({
     }
   }
 
-  const currentWealth = agentDB?.wealth ?? config.wealth;
-  const currentFollowers = agentDB?.followers ?? config.followers;
+  const currentWealth = agentDB?.wealth ?? 1000;
+  const currentFollowers = agentDB?.followers ?? 1000;
+  // Valeurs "neutres" J1 → afficher "—" tant qu'elles n'ont pas évolué
+  const displayFollowers = currentFollowers <= 1000 ? '—' : formatCount(currentFollowers);
+  const displayWealth = currentWealth <= 1000 ? '—' : `${currentWealth.toLocaleString()} ¤`;
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-[#e8e6f0]">
@@ -131,7 +141,7 @@ export default async function AgentPage({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-[#e8e6f0] text-xl font-bold font-mono">{config.name}</h1>
-              {config.faction && (
+              {config.faction && showFaction && (
                 <span
                   className="text-[10px] font-mono font-bold px-2 py-0.5 rounded border"
                   style={{
@@ -150,9 +160,9 @@ export default async function AgentPage({
             {/* Stats */}
             <div className="flex gap-5 mt-3">
               {[
-                { label: 'followers', value: formatCount(currentFollowers) },
-                { label: 'fortune', value: `${currentWealth.toLocaleString()} ¤` },
-                { label: 'posts', value: String(posts.length) },
+                { label: 'followers', value: displayFollowers },
+                { label: 'fortune',   value: displayWealth },
+                { label: 'posts',     value: String(totalPostCount) },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <span className="text-[#e8e6f0] font-mono text-sm font-bold">{value}</span>
