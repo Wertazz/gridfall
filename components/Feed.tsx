@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase';
-import type { FeedPost, ActiveEvent } from '@/lib/types';
+import type { FeedPost } from '@/lib/types';
 import PostCard from './PostCard';
-import EventCard from './EventCard';
 
 export default function Feed({ filter }: { filter?: string | null }) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
-  const [activeEvent, setActiveEvent] = useState<ActiveEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
 
@@ -16,44 +14,30 @@ export default function Feed({ filter }: { filter?: string | null }) {
     const supabase = createClient();
 
     async function init() {
-      const [{ data: postsData }, { data: eventData }] = await Promise.all([
-        supabase
-          .from('posts')
-          .select('*, agents(*)')
-          .order('created_at', { ascending: false })
-          .limit(30),
-        supabase.from('events').select('*').eq('is_active', true).single(),
-      ]);
-
-      if (postsData) setPosts(postsData as unknown as FeedPost[]);
-      if (eventData) setActiveEvent(eventData as ActiveEvent);
+      const { data } = await supabase
+        .from('posts')
+        .select('*, agents(*)')
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (data) setPosts(data as unknown as FeedPost[]);
       setLoading(false);
     }
 
     init();
 
-    // Supabase Realtime — nouveaux posts en temps réel
     const channel = supabase
       .channel('feed-realtime')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'posts' },
+      // Nouveau post
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' },
         async (payload) => {
-          // Re-fetch le post complet avec l'agent jointé
           const { data } = await supabase
             .from('posts')
             .select('*, agents(*)')
             .eq('id', payload.new.id)
             .single();
-
           if (!data) return;
-
           const newPost = data as unknown as FeedPost;
-
-          // Ajouter en tête, garder max 30 posts
           setPosts((prev) => [newPost, ...prev.slice(0, 29)]);
-
-          // Flash d'apparition pendant 3s
           setNewPostIds((prev) => new Set(prev).add(newPost.id));
           setTimeout(() => {
             setNewPostIds((prev) => {
@@ -64,55 +48,32 @@ export default function Feed({ filter }: { filter?: string | null }) {
           }, 3000);
         }
       )
-      // Réactions en temps réel — UPDATE sur posts
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'posts' },
+      // Réactions en temps réel
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' },
         (payload) => {
-          const updated = payload.new as { id: string; flames?: number; boosts?: number; replies?: number };
+          const u = payload.new as { id: string; flames?: number; boosts?: number; replies?: number };
           setPosts((prev) =>
             prev.map((p) =>
-              p.id === updated.id
-                ? {
-                    ...p,
-                    flames: updated.flames ?? p.flames,
-                    boosts: updated.boosts ?? p.boosts,
-                    replies: updated.replies ?? p.replies,
-                  }
+              p.id === u.id
+                ? { ...p, flames: u.flames ?? p.flames, boosts: u.boosts ?? p.boosts, replies: u.replies ?? p.replies }
                 : p
             )
           );
         }
       )
-      // Mise à jour d'un événement → refresh actif
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'events' },
-        async () => {
-          const { data } = await supabase
-            .from('events')
-            .select('*')
-            .eq('is_active', true)
-            .single();
-          setActiveEvent(data ? (data as ActiveEvent) : null);
-        }
-      )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Micro-animations locales toutes les 2-3 min pour simuler de l'activité
-  // entre les vraies générations — aucun appel API, purement cosmétique
+  // Micro-animations locales toutes les 2-3 min (activité cosmétique entre générations)
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
     function tick() {
       setPosts((prev) => {
         if (prev.length === 0) return prev;
-        const count = 2 + Math.floor(Math.random() * 3); // 2-4 posts
+        const count = 2 + Math.floor(Math.random() * 3);
         const indices = new Set<number>();
         while (indices.size < Math.min(count, prev.length)) {
           indices.add(Math.floor(Math.random() * prev.length));
@@ -127,7 +88,6 @@ export default function Feed({ filter }: { filter?: string | null }) {
           };
         });
       });
-      // Prochain tick dans 2-3 minutes
       timeout = setTimeout(tick, 120_000 + Math.floor(Math.random() * 60_000));
     }
 
@@ -137,89 +97,56 @@ export default function Feed({ filter }: { filter?: string | null }) {
 
   if (loading) {
     return (
-      <section className="flex-1 flex flex-col border border-[#1e1e2e] bg-[#0a0a0f] overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-[#1e1e2e] bg-[#0d0d14] shrink-0">
-          <span className="text-[#e8e6f0] text-xs font-mono font-bold tracking-widest uppercase">
-            Live Feed
-          </span>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c084fc] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c084fc]" />
-            </div>
-            <span className="text-[#9ca3af] text-xs font-mono">
-              Connexion Supabase...
-            </span>
+      <div className="flex-1 flex items-center justify-center bg-[#0a0a0f]">
+        <div className="flex items-center gap-2.5">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c084fc] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c084fc]" />
           </div>
+          <span className="text-[#9ca3af] text-xs font-mono">Connexion...</span>
         </div>
-      </section>
+      </div>
     );
   }
 
+  const visible = filter
+    ? posts.filter((p) => {
+        const q = filter.toLowerCase();
+        return (
+          p.content.toLowerCase().includes(q) ||
+          p.agents.name.toLowerCase().includes(q) ||
+          p.agents.handle.toLowerCase().includes(q)
+        );
+      })
+    : posts;
+
   return (
-    <section className="flex-1 flex flex-col overflow-hidden border border-[#1e1e2e] bg-[#0a0a0f]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1e1e2e] bg-[#0d0d14] shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[#e8e6f0] text-xs font-mono font-bold tracking-widest uppercase">
-            Live Feed
-          </span>
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34d399] opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#34d399]" />
+    <div className="flex-1 overflow-y-auto bg-[#0a0a0f]">
+      {/* Badge filtre actif */}
+      {filter && (
+        <div className="sticky top-0 z-10 px-4 py-1.5 border-b border-[#1e1e2e] bg-[#0a0a0f]/95 backdrop-blur-sm">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-[#c084fc]/30 bg-[#c084fc]/10 text-[#c084fc]">
+            #{filter}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          {filter && (
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-[#c084fc]/30 bg-[#c084fc]/10 text-[#c084fc]">
-              #{filter}
+      )}
+
+      {visible.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-2">
+          <span className="text-[#9ca3af] text-xs font-mono">
+            {filter ? `Aucun post pour "${filter}"` : 'Aucun post pour l\'instant.'}
+          </span>
+          {!filter && (
+            <span className="text-[#9ca3af]/50 text-[11px] font-mono">
+              Les agents IA publient toutes les heures.
             </span>
           )}
-          <span className="text-[#9ca3af] text-[11px] font-mono">
-            {posts.length} posts
-          </span>
         </div>
-      </div>
-
-      {/* Événement actif */}
-      {activeEvent?.is_active && <EventCard event={activeEvent} />}
-
-      {/* Posts */}
-      <div className="flex-1 overflow-y-auto">
-        {(() => {
-          const visible = filter
-            ? posts.filter((p) => {
-                const q = filter.toLowerCase();
-                return (
-                  p.content.toLowerCase().includes(q) ||
-                  p.agents.name.toLowerCase().includes(q) ||
-                  p.agents.handle.toLowerCase().includes(q)
-                );
-              })
-            : posts;
-
-          if (visible.length === 0) {
-            return (
-              <div className="flex flex-col items-center justify-center h-48 gap-2">
-                <span className="text-[#9ca3af] text-xs font-mono">
-                  {filter ? `Aucun post pour "${filter}"` : 'Aucun post pour l\'instant.'}
-                </span>
-                {!filter && (
-                  <span className="text-[#9ca3af]/50 text-[11px] font-mono">
-                    Les agents IA publieront toutes les 10 minutes.
-                  </span>
-                )}
-              </div>
-            );
-          }
-
-          return visible.map((post) => (
-            <PostCard key={post.id} post={post} isNew={newPostIds.has(post.id)} />
-          ));
-        })()}
-      </div>
-    </section>
+      ) : (
+        visible.map((post) => (
+          <PostCard key={post.id} post={post} isNew={newPostIds.has(post.id)} />
+        ))
+      )}
+    </div>
   );
 }

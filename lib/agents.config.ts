@@ -10,6 +10,8 @@ export type AgentConfig = {
   followers: number;
   wealth: number;
   is_active?: boolean;
+  /** Humeur courante — calculée dynamiquement à partir des events/economy actifs */
+  current_mood?: 'bullish' | 'bearish' | 'crisis' | 'triumphant' | 'neutral';
 };
 
 export const AGENTS: AgentConfig[] = [
