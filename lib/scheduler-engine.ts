@@ -67,8 +67,19 @@ export async function runSchedulerEngine(
         continue;
       }
 
-      // ── Triggers ────────────────────────────────────────────────────────────
+      // ── Snapshot des prix AVANT les triggers economy ────────────────────────
+      // Nécessaire pour que sell utilise le prix d'avant la mise à jour du post
       const triggers = storyPost.triggers;
+      const priceSnapshot = new Map<string, number>();
+      if (triggers?.sell || triggers?.economy) {
+        const { data: econRows } = await supabase
+          .from('economy')
+          .select('token, price');
+        for (const row of (econRows ?? [])) {
+          priceSnapshot.set(row.token, row.price);
+        }
+      }
+      // ── Triggers ────────────────────────────────────────────────────────────
 
       if (triggers?.close_event) {
         await supabase.from('events').update({ is_active: false }).eq('is_active', true);
@@ -190,19 +201,19 @@ export async function runSchedulerEngine(
           .select('id, wealth')
           .eq('handle', sv.seller)
           .single();
-        const { data: econRow } = await supabase
-          .from('economy')
-          .select('price')
-          .eq('token', sv.token)
-          .single();
+        // Prix pré-triggers : snapshot fetché avant les economy updates de ce post
+        const normalizedSellToken = sv.token.startsWith('$') ? sv.token : `$${sv.token}`;
+        const sellPrice = priceSnapshot.get(normalizedSellToken) ?? 0;
+        // Normalise le token du portfolio pour matcher la valeur stockée lors de l'invest
+        const portfolioToken = sv.token.startsWith('$') ? sv.token : `$${sv.token}`;
         const { data: portfolioRow } = await supabase
           .from('portfolio')
           .select('id, quantity')
-          .eq('token', sv.token)
+          .eq('token', portfolioToken)
           .eq('agent_id', sellAgent?.id ?? '')
           .single();
-        if (sellAgent && econRow && portfolioRow) {
-          const proceeds = Math.round(sv.quantity * econRow.price * 100) / 100;
+        if (sellAgent && sellPrice > 0 && portfolioRow) {
+          const proceeds = Math.round(sv.quantity * sellPrice * 100) / 100;
           const newWealth = Math.round((sellAgent.wealth + proceeds) * 100) / 100;
           const remaining = portfolioRow.quantity - sv.quantity;
           if (remaining <= 0) {
@@ -210,11 +221,24 @@ export async function runSchedulerEngine(
           } else {
             await supabase.from('portfolio').update({ quantity: remaining }).eq('id', portfolioRow.id);
           }
-          await supabase.from('agents').update({ wealth: newWealth }).eq('id', sellAgent.id);
+          // Utilise eq('handle') plutôt que eq('id') — plus robuste et pas de risque de null UUID
+          const { error: sellWealthErr } = await supabase
+            .from('agents')
+            .update({ wealth: newWealth })
+            .eq('handle', sv.seller);
+          if (sellWealthErr) {
+            errors.push(`Sell wealth update failed for ${sv.seller}: ${sellWealthErr.message}`);
+          }
           await supabase.from('wealth_snapshots').insert({
             agent_handle: sv.seller,
             wealth: newWealth,
           });
+        } else {
+          errors.push(
+            `Sell skipped for ${sv.seller}: ` +
+            `agent=${!!sellAgent} price=${sellPrice} portfolio=${!!portfolioRow} ` +
+            `token=${portfolioToken}`,
+          );
         }
       }
 
