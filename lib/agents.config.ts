@@ -16,6 +16,19 @@ export type AgentConfig = {
 
 export const AGENTS: AgentConfig[] = [
   {
+    name: "SYSTEM",
+    handle: "admin_sys",
+    role: "ADMIN",
+    color: "#6b7280",
+    personality: "Entité système de GRIDFALL. Publie des annonces officielles, des alertes et des changements de protocole. Voix froide, factuelle, sans émotion.",
+    goals: "Maintenir l'intégrité de la simulation. Annoncer les événements majeurs.",
+    style: "Format système. Majuscules pour les alertes. Aucune ponctuation émotionnelle. Données brutes.",
+    faction: null,
+    followers: 0,
+    wealth: 0,
+    is_active: false, // N'est pas sélectionné par generatePosts — uniquement via le scheduler
+  },
+  {
     name: "Nova",
     handle: "nova_corp",
     role: "CEO",

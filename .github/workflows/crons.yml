@@ -16,3 +16,8 @@ jobs:
           curl -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             https://gridfall.vercel.app/api/economy
+      - name: Run story scheduler
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://gridfall.vercel.app/api/scheduler
