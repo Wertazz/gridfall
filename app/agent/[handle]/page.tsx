@@ -5,17 +5,8 @@ import { createServiceClient } from '@/lib/supabase';
 import { formatCount, formatTime } from '@/lib/utils';
 import WealthChart from '@/components/WealthChart';
 
-const RELATION_LABEL: Record<string, string> = {
-  ally: 'Allié',
-  rival: 'Rival',
-  enemy: 'Ennemi',
-};
-
-const RELATION_COLOR: Record<string, string> = {
-  ally: '#34d399',
-  rival: '#fbbf24',
-  enemy: '#f87171',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AgentPage({
   params,
@@ -52,23 +43,14 @@ export default async function AgentPage({
     );
   }
 
-  const [postsResult, relationsResult] = await Promise.all([
-    agentDB
-      ? supabase
-          .from('posts')
-          .select('id, content, replies, boosts, flames, created_at')
-          .eq('agent_id', agentDB.id)
-          .order('created_at', { ascending: false })
-          .limit(8)
-      : Promise.resolve({ data: [] }),
-    agentDB
-      ? supabase
-          .from('relations')
-          .select('type, agents!relations_agent_b_fkey(name, handle, color)')
-          .eq('agent_a', agentDB.id)
-          .limit(10)
-      : Promise.resolve({ data: [] }),
-  ]);
+  const postsResult = agentDB
+    ? await supabase
+        .from('posts')
+        .select('id, content, replies, boosts, flames, created_at')
+        .eq('agent_id', agentDB.id)
+        .order('created_at', { ascending: false })
+        .limit(8)
+    : { data: [] };
 
   const posts = (postsResult.data ?? []) as Array<{
     id: string;
@@ -79,11 +61,39 @@ export default async function AgentPage({
     created_at: string;
   }>;
 
-  type RelationRow = {
-    type: string;
-    agents: { name: string; handle: string; color: string } | null;
-  };
-  const relations = (relationsResult.data ?? []) as unknown as RelationRow[];
+  // ── Relations depuis mentions mutuelles dans les posts ────────────────────
+  type MutualRelation = { handle: string; name: string; color: string };
+  const mutualRelations: MutualRelation[] = [];
+
+  if (agentDB && posts.length > 0) {
+    // 1. @handles mentionnés par cet agent dans ses posts
+    const mentionedHandles: string[] = [];
+    for (const p of posts) {
+      const ms = p.content.match(/@([\w_]+)/g) ?? [];
+      for (const m of ms) {
+        const h = m.slice(1);
+        if (h !== params.handle && !mentionedHandles.includes(h)) {
+          mentionedHandles.push(h);
+        }
+      }
+    }
+
+    if (mentionedHandles.length > 0) {
+      // 2. Posts d'autres agents qui mentionnent @this_handle en retour
+      type BackPost = { content: string; agents: { handle: string; name: string; color: string } | null };
+      const { data: backPosts } = await supabase
+        .from('posts')
+        .select('content, agents(handle, name, color)')
+        .ilike('content', `%@${params.handle}%`) as { data: BackPost[] | null };
+
+      for (const bp of backPosts ?? []) {
+        const h = bp.agents?.handle;
+        if (h && mentionedHandles.includes(h) && !mutualRelations.find((r) => r.handle === h)) {
+          mutualRelations.push({ handle: h, name: bp.agents!.name, color: bp.agents!.color });
+        }
+      }
+    }
+  }
 
   const currentWealth = agentDB?.wealth ?? config.wealth;
   const currentFollowers = agentDB?.followers ?? config.followers;
@@ -168,59 +178,63 @@ export default async function AgentPage({
         </div>
 
         {/* Wealth chart */}
-        {wealthHistory.length > 0 && (
-          <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
-            <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-4">
-              Fortune — 7 jours
-            </h2>
+        <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
+          <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-4">
+            Fortune — 7 jours
+          </h2>
+          {wealthHistory.length > 0 ? (
             <WealthChart data={wealthHistory} color={config.color} />
-          </div>
-        )}
+          ) : (
+            <p className="text-[#4b5563] text-xs font-mono">
+              Aucune donnée de fortune pour l&apos;instant.
+            </p>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Relations */}
-          {relations.length > 0 && (
-            <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
-              <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
-                Relations
-              </h2>
+          {/* Relations — depuis mentions mutuelles */}
+          <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
+            <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
+              Relations
+            </h2>
+            {mutualRelations.length === 0 ? (
+              <p className="text-[#4b5563] text-xs font-mono">
+                Aucune relation établie pour l&apos;instant.
+              </p>
+            ) : (
               <div className="space-y-2">
-                {relations.map((rel, i) => {
-                  if (!rel.agents) return null;
-                  const relColor = RELATION_COLOR[rel.type] ?? '#9ca3af';
-                  const relLabel = RELATION_LABEL[rel.type] ?? rel.type;
-                  return (
-                    <Link
-                      key={i}
-                      href={`/agent/${rel.agents.handle}`}
-                      className="flex items-center gap-2.5 py-1.5 hover:opacity-80 transition-opacity"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: rel.agents.color }}
-                      />
-                      <span className="text-[#e8e6f0] text-xs font-mono flex-1">
-                        {rel.agents.name}
-                      </span>
-                      <span
-                        className="text-[10px] font-mono font-bold"
-                        style={{ color: relColor }}
-                      >
-                        {relLabel}
-                      </span>
-                    </Link>
-                  );
-                })}
+                {mutualRelations.map((rel) => (
+                  <Link
+                    key={rel.handle}
+                    href={`/agent/${rel.handle}`}
+                    className="flex items-center gap-2.5 py-1.5 hover:opacity-80 transition-opacity"
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: rel.color }}
+                    />
+                    <span className="text-[#e8e6f0] text-xs font-mono flex-1">
+                      {rel.name}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-[#c084fc]">
+                      Mention mutuelle
+                    </span>
+                  </Link>
+                ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Last posts */}
-          {posts.length > 0 && (
-            <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
-              <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
-                Derniers posts
-              </h2>
+          <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
+            <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
+              Derniers posts
+            </h2>
+            {posts.length === 0 ? (
+              <p className="text-[#4b5563] text-xs font-mono">
+                Cet agent n&apos;a pas encore posté.
+              </p>
+            ) : (
               <div className="space-y-3">
                 {posts.slice(0, 5).map((post) => (
                   <div
@@ -241,8 +255,8 @@ export default async function AgentPage({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

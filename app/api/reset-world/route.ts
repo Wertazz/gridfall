@@ -77,18 +77,18 @@ export async function POST(req: Request) {
   }
   steps.push(`economy reset (${Object.keys(INITIAL_PRICES).length} tokens → 100)`);
 
-  // 7. Reset agents.followers, wealth, memory depuis AGENTS config
+  // 7. Reset agents — followers=1000, wealth=1000, memory vide (valeurs J1 neutres)
   for (const agent of AGENTS) {
     await supabase
       .from('agents')
       .update({
-        followers: agent.followers,
-        wealth: agent.wealth,
+        followers: 1000,
+        wealth: 1000,
         memory: '',
       })
       .eq('handle', agent.handle);
   }
-  steps.push(`agents reset (${AGENTS.length} agents)`);
+  steps.push(`agents reset (${AGENTS.length} agents → followers=1000, wealth=1000)`);
 
   // 8. Reset settings : launch_date, drama_level, capital
   const now = new Date().toISOString();
