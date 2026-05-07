@@ -1,51 +1,48 @@
 'use client';
 
-import { MOCK_TRENDS } from '@/lib/mock-data';
-import { formatCount } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
-type Props = {
-  activeFilter: string | null;
-  onSelect: (topic: string) => void;
-};
+type TrendingTag = { tag: string; count: number };
 
-export default function TrendingBar({ activeFilter, onSelect }: Props) {
+export default function TrendingBar() {
+  const [tags, setTags] = useState<TrendingTag[]>([]);
+
+  async function load() {
+    try {
+      const res = await fetch('/api/trending');
+      if (res.ok) setTags(await res.json());
+    } catch { /* silencieux */ }
+  }
+
+  useEffect(() => {
+    load();
+    // Recalcul toutes les heures
+    const id = setInterval(load, 60 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (tags.length === 0) return null;
+
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-[#1e1e2e] bg-[#0d0d14] overflow-x-auto shrink-0 scrollbar-none">
-      <span className="text-[#9ca3af] text-[10px] font-mono font-bold tracking-widest uppercase shrink-0">
+    <div
+      className="shrink-0 flex items-center gap-2.5 px-3 py-2 border-b border-[#1e1e2e] bg-[#110f1c] overflow-x-auto"
+      style={{ scrollbarWidth: 'none' }}
+    >
+      <span className="text-[#f59e0b] text-[9px] font-mono font-bold tracking-wider uppercase shrink-0">
         Trending
       </span>
-      <div className="w-px h-3 bg-[#1e1e2e] shrink-0" />
-      <div className="flex items-center gap-1.5">
-        {MOCK_TRENDS.map((trend, i) => {
-          const isActive = activeFilter === trend.topic;
-          const isHot = i === 0;
-          return (
-            <button
-              key={trend.topic}
-              onClick={() => onSelect(trend.topic)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-mono whitespace-nowrap transition-all duration-150"
-              style={{
-                borderColor: isActive ? '#c084fc' : isHot ? '#f87171' : '#1e1e2e',
-                color: isActive ? '#c084fc' : isHot ? '#f87171' : '#9ca3af',
-                backgroundColor: isActive ? '#c084fc18' : isHot ? '#f8717110' : 'transparent',
-                boxShadow: isActive ? '0 0 8px #c084fc30' : 'none',
-              }}
-            >
-              <span>{trend.topic}</span>
-              <span className="opacity-60 text-[10px]">{formatCount(trend.count)}</span>
-            </button>
-          );
-        })}
-
-        {activeFilter && (
-          <button
-            onClick={() => onSelect(activeFilter)}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-[#9ca3af] hover:text-[#f87171] transition-colors"
-          >
-            × effacer filtre
-          </button>
-        )}
-      </div>
+      {tags.map(({ tag, count }) => (
+        <span
+          key={tag}
+          className="flex items-center gap-1 text-[10px] text-[#9ca3af] whitespace-nowrap px-2 py-0.5 rounded-full border border-[#2a2840] bg-[#1a1826] hover:border-[#c084fc] hover:text-[#c084fc] cursor-pointer transition-colors shrink-0"
+          title={count > 0 ? `${count} mention${count > 1 ? 's' : ''}` : undefined}
+        >
+          {tag}
+          {count > 1 && (
+            <span className="text-[8px] text-[#4a4a6a] font-mono ml-0.5">{count}</span>
+          )}
+        </span>
+      ))}
     </div>
   );
 }

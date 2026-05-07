@@ -20,10 +20,10 @@ type TokenRow = {
 };
 
 function getDramaLabel(index: number): string {
-  if (index >= 90) return 'CRITIQUE';
-  if (index >= 70) return 'ÉLEVÉ';
-  if (index >= 50) return 'MODÉRÉ';
-  return 'FAIBLE';
+  if (index >= 86) return 'CRITIQUE';
+  if (index >= 61) return 'INSTABLE';
+  if (index >= 31) return 'TENDU';
+  return 'STABLE';
 }
 
 export default function EconomyPanel() {
@@ -43,22 +43,31 @@ export default function EconomyPanel() {
       } catch { /* silencieux */ }
     }
 
+    async function fetchDrama() {
+      try {
+        const res = await fetch('/api/stats');
+        if (res.ok) {
+          const d = await res.json();
+          setDramaIndex(d.dramaIndex ?? 40);
+        }
+      } catch { /* silencieux */ }
+    }
+
     async function init() {
-      const [{ data: tokData }, { data: ev }] = await Promise.all([
-        supabase
-          .from('economy')
-          .select('token, price, change_24h, updated_at, agents(name, color)')
-          .order('price', { ascending: false }),
-        supabase.from('events').select('id').eq('is_active', true).single(),
-      ]);
+      const { data: tokData } = await supabase
+        .from('economy')
+        .select('token, price, change_24h, updated_at, agents(name, color)')
+        .order('price', { ascending: false });
 
       if (tokData) setTokens(tokData as unknown as TokenRow[]);
-      setDramaIndex(ev ? 94 : 40);
-      await fetchHighlights();
+      await Promise.all([fetchDrama(), fetchHighlights()]);
       setLoading(false);
     }
 
     init();
+
+    // Recalcul du drama toutes les 30s
+    const dramaInterval = setInterval(fetchDrama, 30_000);
 
     const channel = supabase
       .channel('economy-realtime')
@@ -71,25 +80,21 @@ export default function EconomyPanel() {
                 : t
             )
           );
+          fetchDrama(); // recalcul immédiat si token bouge
         }
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' },
-        async () => {
-          const { data } = await supabase
-            .from('events')
-            .select('id')
-            .eq('is_active', true)
-            .single();
-          setDramaIndex(data ? 94 : 40);
-        }
+        () => { fetchDrama(); fetchHighlights(); }
       )
-      // Refresh highlights quand un event change
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' },
-        () => { fetchHighlights(); }
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' },
+        () => { fetchDrama(); } // nouveau post peut créer un viral
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(dramaInterval);
+    };
   }, []);
 
   return (

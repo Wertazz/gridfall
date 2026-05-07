@@ -14,18 +14,18 @@ const FACTION_ABBR: Record<string, string> = {
 };
 
 export default function AgentSidebar() {
-  // handle → change_24h
   const [ecoMap, setEcoMap] = useState<Map<string, number>>(new Map());
-  // handles impliqués dans l'event actif
   const [activeHandles, setActiveHandles] = useState<Set<string>>(new Set());
+  const [factionCounts, setFactionCounts] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
     const supabase = createClient();
 
     async function load() {
-      const [{ data: eco }, { data: event }] = await Promise.all([
+      const [{ data: eco }, { data: event }, { data: agentsDB }] = await Promise.all([
         supabase.from('economy').select('change_24h, agents(handle)'),
         supabase.from('events').select('agents_involved').eq('is_active', true).single(),
+        supabase.from('agents').select('faction'),
       ]);
 
       const map = new Map<string, number>();
@@ -37,6 +37,14 @@ export default function AgentSidebar() {
 
       const involved = event?.agents_involved as string[] | undefined;
       setActiveHandles(new Set(involved ?? []));
+
+      // Compte dynamique par faction depuis la DB
+      const counts = new Map<string, number>();
+      for (const a of (agentsDB ?? []) as { faction: string | null }[]) {
+        const f = a.faction ?? 'Sans-Factions';
+        counts.set(f, (counts.get(f) ?? 0) + 1);
+      }
+      setFactionCounts(counts);
     }
 
     load();
@@ -188,11 +196,11 @@ export default function AgentSidebar() {
           <span className="text-[#4a4a6a] text-[9px] font-mono tracking-[0.2em] uppercase">Factions</span>
         </div>
         {[
-          { name: 'NovaCorp',          color: '#c084fc', count: 4 },
-          { name: 'Révolution Eden',   color: '#34d399', count: 3 },
-          { name: 'ApexCorp',          color: '#f43f5e', count: 1 },
-          { name: 'Culte de Nyx',      color: '#f472b6', count: 1 },
-          { name: 'Sans-Factions',     color: '#9ca3af', count: 11 },
+          { name: 'NovaCorp',          color: '#c084fc' },
+          { name: 'Révolution Eden',   color: '#34d399' },
+          { name: 'ApexCorp',          color: '#f43f5e' },
+          { name: 'Culte de Nyx',      color: '#f472b6' },
+          { name: 'Sans-Factions',     color: '#9ca3af' },
         ].map((f) => (
           <div
             key={f.name}
@@ -200,7 +208,9 @@ export default function AgentSidebar() {
             style={{ borderLeft: `2px solid ${f.color}` }}
           >
             <span className="text-[#6a6a8a] text-[11px] truncate">{f.name}</span>
-            <span className="text-[#4a4a6a] text-[9px] font-mono shrink-0 ml-2">{f.count} agents</span>
+            <span className="text-[#4a4a6a] text-[9px] font-mono shrink-0 ml-2">
+              {factionCounts.get(f.name) ?? '—'} agents
+            </span>
           </div>
         ))}
       </div>

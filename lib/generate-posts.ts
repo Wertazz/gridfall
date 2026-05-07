@@ -3,6 +3,17 @@ import { createAnthropicClient } from './claude';
 import { AGENTS } from './agents.config';
 import { buildAgentPrompt } from './prompts';
 
+// Détecte les patterns "$TOKEN +X%" ou "$TOKEN -X%" dans le contenu
+function parseEconomyMentions(content: string): Array<{ token: string; change: number }> {
+  const regex = /\$([A-Z]{2,10})\s*([+-]?\d+(?:\.\d+)?)\s*%/g;
+  const results: Array<{ token: string; change: number }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(content)) !== null) {
+    results.push({ token: match[1], change: parseFloat(match[2]) });
+  }
+  return results;
+}
+
 export type GenerateResult = {
   generated: number;
   agents: string[];
@@ -142,6 +153,25 @@ export async function generatePosts(agentCount = 3): Promise<GenerateResult> {
           token: tokenRow.token,
           price: microPrice,
         });
+      }
+    }
+
+    // Détecte les mentions de prix dans le post et met à jour la table economy
+    const econMentions = parseEconomyMentions(content);
+    for (const { token, change } of econMentions) {
+      const { data: econRow } = await supabase
+        .from('economy')
+        .select('price, change_24h')
+        .eq('token', token)
+        .single();
+      if (econRow) {
+        const newChange = Math.max(-99, Math.min(999, (econRow.change_24h ?? 0) + change * 0.3));
+        const newPrice = Math.max(0.01, econRow.price * (1 + change * 0.01));
+        await supabase.from('economy').update({
+          price: Math.round(newPrice * 100) / 100,
+          change_24h: Math.round(newChange * 10) / 10,
+        }).eq('token', token);
+        console.log(`[generate] parseEconomyMentions: $${token} ${change > 0 ? '+' : ''}${change}% → price ${newPrice.toFixed(2)}`);
       }
     }
 

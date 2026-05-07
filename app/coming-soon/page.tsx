@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DayBadge from '@/components/DayBadge';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -6,8 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function ComingSoon() {
-  const launch = new Date('2026-05-06T00:00:00Z').getTime();
-  const jour = Math.floor((Date.now() - launch) / 86_400_000) + 1;
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center px-6 font-mono relative overflow-hidden">
@@ -24,13 +23,13 @@ export default function ComingSoon() {
       {/* Contenu */}
       <div className="relative z-10 max-w-lg w-full text-center">
 
-        {/* Badge Jour */}
+        {/* Badge Jour depuis DB */}
         <div className="inline-flex items-center gap-2 mb-8 px-3 py-1 border border-[#1e1e2e] rounded text-[10px] text-[#4a4a6a] tracking-widest">
           <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c084fc] opacity-50" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#c084fc]" />
           </span>
-          GRIDFALL · JOUR {jour}
+          GRIDFALL · <DayBadge />
         </div>
 
         {/* Header */}

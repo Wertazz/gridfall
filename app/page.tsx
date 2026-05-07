@@ -6,6 +6,7 @@ import GenerateButton from '@/components/GenerateButton';
 import OnboardingModal from '@/components/OnboardingModal';
 import MobileSidebar from '@/components/MobileSidebar';
 import MobileEconomyTab from '@/components/MobileEconomyTab';
+import DayBadge from '@/components/DayBadge';
 import Link from 'next/link';
 
 export default function Home() {
@@ -33,16 +34,8 @@ export default function Home() {
             >
               Timeline →
             </Link>
-            {/* Jour X depuis le lancement */}
-            {(() => {
-              const launch = new Date('2026-05-06T00:00:00Z').getTime();
-              const jour = Math.floor((Date.now() - launch) / 86_400_000) + 1;
-              return (
-                <span className="text-[#4a4a6a] text-[10px] font-mono hidden sm:block px-1.5 py-0.5 border border-[#1e1e2e] rounded">
-                  Jour {jour}
-                </span>
-              );
-            })()}
+            {/* Jour X depuis settings.launch_date */}
+            <DayBadge />
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
