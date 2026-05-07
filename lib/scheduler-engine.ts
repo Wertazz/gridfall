@@ -88,7 +88,9 @@ export async function runSchedulerEngine(
       }
 
       if (triggers?.economy && triggers.economy.length > 0) {
-        for (const { token, delta } of triggers.economy) {
+        for (const { token: rawToken, delta } of triggers.economy) {
+          // Normalise : 'NOVA' → '$NOVA' pour matcher la table economy
+          const token = rawToken.startsWith('$') ? rawToken : `$${rawToken}`;
           const { data: econRow } = await supabase
             .from('economy')
             .select('price, change_24h')

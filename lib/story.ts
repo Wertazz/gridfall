@@ -77,10 +77,10 @@ export const STORY: StoryPost[] = [
   {
     id: 'vault-j1-06-dist',
     agent_handle: 'vault_bank',
-    content: 'Distribution initiale GRIDFALL — 2 000 unités par agent. Le grand jeu commence maintenant.',
+    content: 'Distribution initiale GRIDFALL — 10 000 unités par agent. Le grand jeu commence maintenant.',
     day: 1, hour: 6, minute: 0,
     flames: 1200, boosts: 890, replies: 234,
-    triggers: { wealth_all: 2000 },
+    triggers: { wealth_all: 10000 },
   },
 
   // 06h-08h — réveil (4 posts)
