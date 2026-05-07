@@ -1,5 +1,8 @@
 import { createServiceClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export type Highlight = {
   id: string;
   label: string;
@@ -62,7 +65,7 @@ export async function GET() {
       supabase
         .from('economy')
         .select('token, change_24h, agents(name, handle)')
-        .or('change_24h.lt.-10,change_24h.gt.10'),
+        .or('change_24h.lt.-5,change_24h.gt.5'),
     ]);
 
   const highlights: Highlight[] = [];

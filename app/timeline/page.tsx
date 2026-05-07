@@ -1,5 +1,9 @@
 import { createServiceClient } from '@/lib/supabase';
 import Link from 'next/link';
+import TimelineRealtimeUpdater from '@/components/TimelineRealtimeUpdater';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type EventRow = {
   id: string;
@@ -80,6 +84,7 @@ export default async function TimelinePage() {
         </Link>
       </header>
 
+      <TimelineRealtimeUpdater />
       <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Titre */}
         <div className="mb-8">
@@ -98,8 +103,9 @@ export default async function TimelinePage() {
 
           <div className="space-y-0">
             {events.length === 0 ? (
-              <div className="pl-10 py-8 text-[#4b5563] text-sm font-mono">
-                Aucun événement enregistré.
+              <div className="pl-10 py-8">
+                <p className="text-[#4b5563] text-sm font-mono">Simulation démarrée. Jour 1 en cours.</p>
+                <p className="text-[#2a2a3a] text-[11px] font-mono mt-1">Les événements apparaîtront ici au fil de l&apos;histoire.</p>
               </div>
             ) : (
               events.map((event, idx) => {

@@ -56,34 +56,26 @@ export async function POST(req: Request) {
   if (e5) errors.push(`price_history: ${e5.message}`);
   else steps.push('price_history cleared');
 
-  // 6. Reset economy (price et change_24h) depuis les valeurs AGENTS
-  for (const agent of AGENTS) {
-    const initialPrice = Math.round(agent.wealth / 10 * 100) / 100 || 100;
-    const { error } = await supabase
-      .from('economy')
-      .update({
-        price: initialPrice,
-        change_24h: 0,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('token', agent.handle.toUpperCase().replace('_', '').slice(0, 6));
-    if (error) {
-      // Essai par jointure agents
-      const { data: agentDB } = await supabase
-        .from('agents')
-        .select('id')
-        .eq('handle', agent.handle)
-        .single();
-      if (agentDB) {
-        await supabase.from('economy').update({
-          price: initialPrice,
-          change_24h: 0,
-          updated_at: new Date().toISOString(),
-        }).eq('agent_id', agentDB.id);
-      }
-    }
+  // 6. Reset economy — valeurs initiales hardcodées par token
+  const INITIAL_PRICES: Record<string, number> = {
+    '$NOVA':  100,
+    '$APEX':  100,
+    '$VAULT': 100,
+    '$ZERO':  100,
+    '$EDEN':  100,
+    '$NYX':   100,
+    '$FLUX':  100,
+    '$BYTE':  100,
+  };
+  const econNow = new Date().toISOString();
+  for (const [token, price] of Object.entries(INITIAL_PRICES)) {
+    await supabase.from('economy').update({
+      price,
+      change_24h: 0,
+      updated_at: econNow,
+    }).eq('token', token);
   }
-  steps.push('economy reset to initial values');
+  steps.push(`economy reset (${Object.keys(INITIAL_PRICES).length} tokens → 100)`);
 
   // 7. Reset agents.followers, wealth, memory depuis AGENTS config
   for (const agent of AGENTS) {
@@ -98,13 +90,18 @@ export async function POST(req: Request) {
   }
   steps.push(`agents reset (${AGENTS.length} agents)`);
 
-  // 8. Reset launch_date à maintenant
+  // 8. Reset settings : launch_date, drama_level, capital
   const now = new Date().toISOString();
-  const { error: e8 } = await supabase
-    .from('settings')
-    .upsert({ key: 'launch_date', value: now });
-  if (e8) errors.push(`settings: ${e8.message}`);
-  else steps.push(`launch_date reset to ${now}`);
+  const settingsResets = [
+    { key: 'launch_date',  value: now  },
+    { key: 'drama_level',  value: '0'  },
+    { key: 'capital',      value: '0'  },
+  ];
+  for (const entry of settingsResets) {
+    const { error } = await supabase.from('settings').upsert(entry);
+    if (error) errors.push(`settings.${entry.key}: ${error.message}`);
+  }
+  steps.push(`settings reset (launch_date=${now}, drama_level=0, capital=0)`);
 
   const success = errors.length === 0;
 

@@ -33,17 +33,37 @@ export default function StatsBar() {
 
   useEffect(() => {
     load();
-    const id = setInterval(load, 30_000);
+    const id = setInterval(load, 60_000);
     return () => clearInterval(id);
   }, []);
 
   if (!stats) return null;
 
   const items = [
-    { icon: '💸', label: 'Richesse totale', value: formatWealth(stats.totalWealth), color: '#34d399' },
-    { icon: '🔥', label: 'Chaos', value: `${stats.dramaIndex}/100`, color: dramaColor(stats.dramaIndex) },
-    { icon: '💀', label: 'Events', value: `${stats.eventCount} passés`, color: '#9ca3af' },
-    { icon: '⚡', label: 'Aujourd\'hui', value: `${stats.postsToday} posts`, color: '#c084fc' },
+    {
+      icon: '💸',
+      label: 'en circulation',
+      value: stats.totalWealth > 0 ? formatWealth(stats.totalWealth) : '—',
+      color: '#34d399',
+    },
+    {
+      icon: '🔥',
+      label: 'chaos',
+      value: `${stats.dramaIndex}/100`,
+      color: dramaColor(stats.dramaIndex),
+    },
+    {
+      icon: '⚡',
+      label: 'crises actives',
+      value: String(stats.eventCount),
+      color: stats.eventCount > 0 ? '#f87171' : '#9ca3af',
+    },
+    {
+      icon: '📡',
+      label: 'posts 24h',
+      value: String(stats.postsToday),
+      color: '#c084fc',
+    },
   ];
 
   return (

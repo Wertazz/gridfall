@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase';
 
 type TrendingTag = { tag: string; count: number };
 
 export default function TrendingBar() {
   const [tags, setTags] = useState<TrendingTag[]>([]);
+  const [postCount, setPostCount] = useState<number>(0);
 
   async function load() {
     try {
@@ -15,13 +17,22 @@ export default function TrendingBar() {
   }
 
   useEffect(() => {
+    const supabase = createClient();
+
+    async function checkPosts() {
+      const { count } = await supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true });
+      setPostCount(count ?? 0);
+    }
+
     load();
-    // Recalcul toutes les heures
-    const id = setInterval(load, 60 * 60 * 1000);
+    checkPosts();
+    const id = setInterval(() => { load(); checkPosts(); }, 30 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
 
-  if (tags.length === 0) return null;
+  if (postCount < 10 || tags.length === 0) return null;
 
   return (
     <div

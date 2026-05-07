@@ -21,6 +21,8 @@ export interface StoryPost {
     followers?: Array<{ handle: string; delta: number }>;
     drama_delta?: number;
     close_event?: boolean;
+    /** Déclenche un reset-world avec launch_date = now() + delay_days */
+    reset_world?: { delay_days: number };
   };
 }
 

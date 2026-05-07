@@ -16,16 +16,18 @@ const FACTION_ABBR: Record<string, string> = {
 export default function AgentSidebar() {
   const [ecoMap, setEcoMap] = useState<Map<string, number>>(new Map());
   const [activeHandles, setActiveHandles] = useState<Set<string>>(new Set());
-  const [factionCounts, setFactionCounts] = useState<Map<string, number>>(new Map());
+  // faction → nb de posts (agents ayant posté au moins 1 fois)
+  const [factionPostCounts, setFactionPostCounts] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
     const supabase = createClient();
 
     async function load() {
-      const [{ data: eco }, { data: event }, { data: agentsDB }] = await Promise.all([
+      const [{ data: eco }, { data: event }, { data: postedAgents }] = await Promise.all([
         supabase.from('economy').select('change_24h, agents(handle)'),
         supabase.from('events').select('agents_involved').eq('is_active', true).single(),
-        supabase.from('agents').select('faction'),
+        // Agents qui ont posté — jointure posts → agents.faction
+        supabase.from('posts').select('agents(faction, handle)'),
       ]);
 
       const map = new Map<string, number>();
@@ -38,13 +40,16 @@ export default function AgentSidebar() {
       const involved = event?.agents_involved as string[] | undefined;
       setActiveHandles(new Set(involved ?? []));
 
-      // Compte dynamique par faction depuis la DB
-      const counts = new Map<string, number>();
-      for (const a of (agentsDB ?? []) as { faction: string | null }[]) {
-        const f = a.faction ?? 'Sans-Factions';
-        counts.set(f, (counts.get(f) ?? 0) + 1);
+      // Compte de posts par faction (agents ayant posté au moins 1 fois)
+      type PostedRow = { agents: { faction: string | null; handle: string } | null };
+      const postCounts = new Map<string, number>();
+      for (const p of (postedAgents ?? []) as unknown as PostedRow[]) {
+        const faction = p.agents?.faction;
+        if (faction && faction !== 'Sans-Faction' && faction !== 'Sans-Factions') {
+          postCounts.set(faction, (postCounts.get(faction) ?? 0) + 1);
+        }
       }
-      setFactionCounts(counts);
+      setFactionPostCounts(postCounts);
     }
 
     load();
@@ -190,18 +195,19 @@ export default function AgentSidebar() {
         })}
       </div>
 
-      {/* ── Factions ── */}
+      {/* ── Factions — visible uniquement si au moins une faction non-null existe ── */}
+      {/* Factions — n'apparaissent que quand leurs agents ont posté */}
+      {factionPostCounts.size > 0 && (
       <div className="shrink-0 border-t border-[#1e1e2e]">
         <div className="px-3 py-1.5">
-          <span className="text-[#4a4a6a] text-[9px] font-mono tracking-[0.2em] uppercase">Factions</span>
+          <span className="text-[#4a4a6a] text-[9px] font-mono tracking-[0.2em] uppercase">Factions actives</span>
         </div>
-        {[
-          { name: 'NovaCorp',          color: '#c084fc' },
-          { name: 'Révolution Eden',   color: '#34d399' },
-          { name: 'ApexCorp',          color: '#f43f5e' },
-          { name: 'Culte de Nyx',      color: '#f472b6' },
-          { name: 'Sans-Factions',     color: '#9ca3af' },
-        ].map((f) => (
+        {([
+          { name: 'NovaCorp',        color: '#c084fc' },
+          { name: 'Révolution Eden', color: '#34d399' },
+          { name: 'ApexCorp',        color: '#f43f5e' },
+          { name: 'Culte de Nyx',    color: '#f472b6' },
+        ] as const).filter((f) => factionPostCounts.has(f.name)).map((f) => (
           <div
             key={f.name}
             className="flex items-center justify-between px-3 py-1.5 hover:bg-[#13131f] cursor-pointer transition-colors"
@@ -209,11 +215,12 @@ export default function AgentSidebar() {
           >
             <span className="text-[#6a6a8a] text-[11px] truncate">{f.name}</span>
             <span className="text-[#4a4a6a] text-[9px] font-mono shrink-0 ml-2">
-              {factionCounts.get(f.name) ?? '—'} agents
+              {factionPostCounts.get(f.name)} posts
             </span>
           </div>
         ))}
       </div>
+      )}
     </aside>
   );
 }

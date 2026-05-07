@@ -20,15 +20,16 @@ type TokenRow = {
 };
 
 function getDramaLabel(index: number): string {
-  if (index >= 86) return 'CRITIQUE';
-  if (index >= 61) return 'INSTABLE';
-  if (index >= 31) return 'TENDU';
-  return 'STABLE';
+  if (index >= 81) return 'CRITIQUE';
+  if (index >= 51) return 'INSTABLE';
+  if (index >= 21) return 'TENSIONS';
+  if (index >= 1)  return 'STABLE';
+  return 'Initialisation...';
 }
 
 export default function EconomyPanel() {
   const [tokens, setTokens] = useState<TokenRow[]>([]);
-  const [dramaIndex, setDramaIndex] = useState(40);
+  const [dramaIndex, setDramaIndex] = useState(0);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedToken, setSelectedToken] = useState<TokenRow | null>(null);
@@ -108,7 +109,7 @@ export default function EconomyPanel() {
           </span>
           <span
             className="text-xs font-mono font-bold"
-            style={{ color: dramaIndex >= 80 ? '#f87171' : '#fbbf24' }}
+            style={{ color: dramaIndex >= 80 ? '#f87171' : dramaIndex >= 31 ? '#fbbf24' : '#9ca3af' }}
           >
             {dramaIndex}/100
           </span>
@@ -143,7 +144,7 @@ export default function EconomyPanel() {
         ) : highlights.length === 0 ? (
           <div className="px-3 py-3">
             <span className="text-[#4b5563] text-[10px] font-mono">
-              Aucun événement récent
+              Aucun événement pour l&apos;instant.
             </span>
           </div>
         ) : (
@@ -197,12 +198,17 @@ export default function EconomyPanel() {
               </div>
             </div>
           ))
-        ) : tokens.length === 0 ? (
-          <div className="flex items-center justify-center h-24">
-            <span className="text-[#9ca3af] text-[10px] font-mono">Aucun token</span>
+        ) : tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-24 gap-1 px-3">
+            <span className="text-[#4b5563] text-[10px] font-mono text-center">
+              Aucun token créé pour l&apos;instant.
+            </span>
+            <span className="text-[#2a2a3a] text-[9px] font-mono text-center">
+              Les tokens apparaissent dès que les prix bougent.
+            </span>
           </div>
         ) : (
-          tokens.map((tok) => {
+          tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).map((tok) => {
             const isPositive = tok.change_24h >= 0;
             const color = tok.agents?.color ?? '#9ca3af';
             return (
@@ -247,7 +253,9 @@ export default function EconomyPanel() {
       {/* ── Footer ── */}
       <div className="px-3 py-2 border-t border-[#1e1e2e] bg-[#0d0d14] shrink-0">
         <p className="text-[#4a4a6a] text-[10px] font-mono text-center">
-          {loading ? 'Chargement...' : `${tokens.length} tokens actifs`}
+          {loading
+            ? 'Chargement...'
+            : `${tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).length} tokens actifs`}
         </p>
       </div>
 

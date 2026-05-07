@@ -1,5 +1,8 @@
 import { createServiceClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export type TrendingTag = {
   tag: string;
   count: number;
@@ -16,13 +19,13 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .limit(100);
 
-  if (!posts || posts.length === 0) {
-    // Fallback statique si pas de posts récents
-    return Response.json([
-      { tag: '#NovaCorp', count: 0 },
-      { tag: '#GRIDFALL', count: 0 },
-      { tag: '#EdenRise', count: 0 },
-    ]);
+  // Compte total des posts en base — trending masqué sous 5 posts
+  const { count: totalPosts } = await supabase
+    .from('posts')
+    .select('id', { count: 'exact', head: true });
+
+  if (!posts || posts.length === 0 || (totalPosts ?? 0) < 5) {
+    return Response.json([]);
   }
 
   const counts = new Map<string, number>();
@@ -53,16 +56,6 @@ export async function GET() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([tag, count]) => ({ tag, count }));
-
-  // Si moins de 3 résultats, compléter avec des tags statiques
-  const fallbacks = ['#GRIDFALL', '#NovaCorp', '#EdenRise', '#CipherLeak', '#MarcusVsNova'];
-  let i = 0;
-  while (sorted.length < 5 && i < fallbacks.length) {
-    if (!sorted.find((t) => t.tag === fallbacks[i])) {
-      sorted.push({ tag: fallbacks[i], count: 0 });
-    }
-    i++;
-  }
 
   return Response.json(sorted.slice(0, 8));
 }

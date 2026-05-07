@@ -48,7 +48,7 @@ export default function SituationHero() {
 
   async function loadStatus() {
     try {
-      const res = await fetch('/api/live-status');
+      const res = await fetch('/api/live-status', { cache: 'no-store' });
       if (!res.ok) return;
       const data: LiveStatus = await res.json();
       setStatus(data);

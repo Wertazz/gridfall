@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase';
 import { STORY, getDueStoryPosts, getPostSimHour } from '@/lib/story-scheduler';
+import { AGENTS } from '@/lib/agents.config';
 
 // Vérification du token de sécurité (Vercel cron ou appel manuel)
 function isAuthorized(req: Request): boolean {
@@ -148,6 +149,81 @@ export async function GET(req: Request) {
             }).eq('handle', handle);
           }
         }
+      }
+
+      if (triggers?.drama_delta) {
+        const { data: dramaRow } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'drama_level')
+          .single();
+        const current = dramaRow ? parseFloat(dramaRow.value) || 0 : 0;
+        const next = Math.max(0, Math.min(100, current + triggers.drama_delta));
+        await supabase
+          .from('settings')
+          .upsert({ key: 'drama_level', value: String(next) });
+      }
+
+      if (triggers?.reset_world) {
+        const { delay_days } = triggers.reset_world;
+        const newLaunchDate = new Date(
+          Date.now() + delay_days * 24 * 60 * 60 * 1000
+        ).toISOString();
+
+        // Séquence reset — même ordre que /api/reset-world
+        await supabase.from('votes').delete().gte('created_at', '2000-01-01');
+        await supabase.from('posts').delete().gte('created_at', '2000-01-01');
+        await supabase.from('events').delete().gte('created_at', '2000-01-01');
+        await supabase.from('story_log').delete().gte('published_at', '2000-01-01');
+        await supabase.from('price_history').delete().gte('recorded_at', '2000-01-01');
+
+        // Reset economy
+        for (const agent of AGENTS) {
+          const initialPrice = Math.round((agent.wealth / 10) * 100) / 100 || 100;
+          const tokenGuess = agent.handle.toUpperCase().replace('_', '').slice(0, 6);
+          const { error: econErr } = await supabase
+            .from('economy')
+            .update({ price: initialPrice, change_24h: 0, updated_at: new Date().toISOString() })
+            .eq('token', tokenGuess);
+          if (econErr) {
+            const { data: agentDB } = await supabase
+              .from('agents')
+              .select('id')
+              .eq('handle', agent.handle)
+              .single();
+            if (agentDB) {
+              await supabase.from('economy').update({
+                price: initialPrice,
+                change_24h: 0,
+                updated_at: new Date().toISOString(),
+              }).eq('agent_id', agentDB.id);
+            }
+          }
+        }
+
+        // Reset agents
+        for (const agent of AGENTS) {
+          await supabase
+            .from('agents')
+            .update({ followers: agent.followers, wealth: agent.wealth, memory: '' })
+            .eq('handle', agent.handle);
+        }
+
+        // Planifie le prochain lancement
+        await supabase
+          .from('settings')
+          .upsert({ key: 'launch_date', value: newLaunchDate });
+
+        // Reset drama_level
+        await supabase
+          .from('settings')
+          .upsert({ key: 'drama_level', value: '0' });
+
+        console.log(`[scheduler] reset_world triggered — next launch: ${newLaunchDate}`);
+
+        // Story_log déjà vidé — on skip l'insert et on passe au post suivant
+        results.push(storyPost.id);
+        continue;
       }
 
       // 8. Log le post dans story_log
