@@ -118,11 +118,12 @@ export async function GET(req: Request) {
 
           if (econRow) {
             const newPrice = Math.max(0.01, econRow.price * (1 + delta / 100));
+            const roundedPrice = Math.round(newPrice * 100) / 100;
             const newChange = Math.max(-99, Math.min(999,
               (econRow.change_24h ?? 0) * 0.7 + delta // blend avec le delta
             ));
             await supabase.from('economy').update({
-              price: Math.round(newPrice * 100) / 100,
+              price: roundedPrice,
               change_24h: Math.round(newChange * 10) / 10,
               updated_at: new Date().toISOString(),
             }).eq('token', token);
@@ -130,8 +131,19 @@ export async function GET(req: Request) {
             // Log dans price_history
             await supabase.from('price_history').insert({
               token,
-              price: Math.round(newPrice * 100) / 100,
+              price: roundedPrice,
             });
+
+            // Mise à jour automatique des portfolios pour ce token
+            const { data: portfolioRows } = await supabase
+              .from('portfolio')
+              .select('id, quantity')
+              .eq('token', token);
+            for (const row of (portfolioRows ?? [])) {
+              await supabase.from('portfolio').update({
+                current_value: Math.round(row.quantity * roundedPrice * 100) / 100,
+              }).eq('id', row.id);
+            }
           }
         }
       }
@@ -162,6 +174,70 @@ export async function GET(req: Request) {
         await supabase
           .from('settings')
           .upsert({ key: 'drama_level', value: String(next) });
+      }
+
+      if (triggers?.wealth_all !== undefined) {
+        await supabase.from('agents').update({ wealth: triggers.wealth_all }).gte('id', '00000000-0000-0000-0000-000000000000');
+      }
+
+      if (triggers?.invest) {
+        const inv = triggers.invest;
+        const cost = inv.quantity * inv.price;
+        const { data: invAgent } = await supabase
+          .from('agents')
+          .select('id, wealth')
+          .eq('handle', inv.buyer)
+          .single();
+        if (invAgent && invAgent.wealth >= cost) {
+          const newWealth = Math.round((invAgent.wealth - cost) * 100) / 100;
+          await supabase.from('portfolio').insert({
+            agent_id: invAgent.id,
+            token: inv.token,
+            quantity: inv.quantity,
+            buy_price: inv.price,
+            current_value: Math.round(inv.quantity * inv.price * 100) / 100,
+          });
+          await supabase.from('agents').update({ wealth: newWealth }).eq('id', invAgent.id);
+          await supabase.from('wealth_snapshots').insert({
+            agent_handle: inv.buyer,
+            wealth: newWealth,
+          });
+        }
+      }
+
+      if (triggers?.sell) {
+        const sv = triggers.sell;
+        const { data: sellAgent } = await supabase
+          .from('agents')
+          .select('id, wealth')
+          .eq('handle', sv.seller)
+          .single();
+        const { data: econRow } = await supabase
+          .from('economy')
+          .select('price')
+          .eq('token', sv.token)
+          .single();
+        const { data: portfolioRow } = await supabase
+          .from('portfolio')
+          .select('id, quantity')
+          .eq('token', sv.token)
+          .eq('agent_id', sellAgent?.id ?? '')
+          .single();
+        if (sellAgent && econRow && portfolioRow) {
+          const proceeds = Math.round(sv.quantity * econRow.price * 100) / 100;
+          const newWealth = Math.round((sellAgent.wealth + proceeds) * 100) / 100;
+          const remaining = portfolioRow.quantity - sv.quantity;
+          if (remaining <= 0) {
+            await supabase.from('portfolio').delete().eq('id', portfolioRow.id);
+          } else {
+            await supabase.from('portfolio').update({ quantity: remaining }).eq('id', portfolioRow.id);
+          }
+          await supabase.from('agents').update({ wealth: newWealth }).eq('id', sellAgent.id);
+          await supabase.from('wealth_snapshots').insert({
+            agent_handle: sv.seller,
+            wealth: newWealth,
+          });
+        }
       }
 
       if (triggers?.reset_world) {

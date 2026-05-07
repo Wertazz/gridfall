@@ -56,6 +56,14 @@ export async function POST(req: Request) {
   if (e4b) errors.push(`wealth_snapshots: ${e4b.message}`);
   else steps.push('wealth_snapshots cleared');
 
+  // 4c. Supprime les portfolios (investissements repartent de zéro)
+  const { error: e4c } = await supabase
+    .from('portfolio')
+    .delete()
+    .gte('created_at', '2000-01-01');
+  if (e4c) errors.push(`portfolio: ${e4c.message}`);
+  else steps.push('portfolio cleared');
+
   // 5. Reset price_history (garde seulement les prix initiaux)
   const { error: e5 } = await supabase
     .from('price_history')

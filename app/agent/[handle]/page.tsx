@@ -50,6 +50,18 @@ export default async function AgentPage({
   const showFaction = (factionMentionResult.count ?? 0) > 0;
   const totalPostCount = (totalPostsResult.data as { posts: unknown[] } | null)?.posts?.length ?? 0;
 
+  // Portfolio — positions d'investissement (chargé après agentDB)
+  type PortfolioRow = { token: string; quantity: number; buy_price: number; current_value: number };
+  const portfolio: PortfolioRow[] = [];
+  if (agentDB) {
+    const { data: portfolioData } = await supabase
+      .from('portfolio')
+      .select('token, quantity, buy_price, current_value')
+      .eq('agent_id', agentDB.id)
+      .order('token', { ascending: true });
+    portfolio.push(...((portfolioData ?? []) as PortfolioRow[]));
+  }
+
   const postsResult = agentDB
     ? await supabase
         .from('posts')
@@ -198,6 +210,60 @@ export default async function AgentPage({
             <p className="text-[#4b5563] text-xs font-mono">
               Aucune donnée de fortune pour l&apos;instant.
             </p>
+          )}
+        </div>
+
+        {/* Portfolio */}
+        <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
+          <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-4">
+            Portfolio
+          </h2>
+          {portfolio.length === 0 ? (
+            <p className="text-[#4b5563] text-xs font-mono">
+              Aucun investissement pour l&apos;instant.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs font-mono">
+                <thead>
+                  <tr className="text-[#4b5563] text-[10px] uppercase tracking-widest border-b border-[#1e1e2e]">
+                    <th className="text-left pb-2 pr-4">Token</th>
+                    <th className="text-right pb-2 pr-4">Qté</th>
+                    <th className="text-right pb-2 pr-4">Achat</th>
+                    <th className="text-right pb-2 pr-4">Actuel</th>
+                    <th className="text-right pb-2 pr-4">+/−</th>
+                    <th className="text-right pb-2">Valeur</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {portfolio.map((row) => {
+                    const gain = row.buy_price > 0 ? ((row.current_value / (row.quantity * row.buy_price)) - 1) * 100 : 0;
+                    const isGain = gain >= 0;
+                    const currentPrice = row.quantity > 0 ? row.current_value / row.quantity : row.buy_price;
+                    return (
+                      <tr key={row.token} className="border-b border-[#1e1e2e]/40 last:border-0">
+                        <td className="py-2 pr-4 font-bold" style={{ color: config.color }}>{row.token}</td>
+                        <td className="py-2 pr-4 text-right text-[#e8e6f0]">{row.quantity}</td>
+                        <td className="py-2 pr-4 text-right text-[#9ca3af]">{row.buy_price.toFixed(2)} ¤</td>
+                        <td className="py-2 pr-4 text-right text-[#e8e6f0]">{currentPrice.toFixed(2)} ¤</td>
+                        <td className="py-2 pr-4 text-right font-bold" style={{ color: isGain ? '#34d399' : '#f87171' }}>
+                          {isGain ? '+' : ''}{gain.toFixed(1)}%
+                        </td>
+                        <td className="py-2 text-right text-[#e8e6f0]">{row.current_value.toFixed(2)} ¤</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-[#1e1e2e] text-[#9ca3af]">
+                    <td colSpan={5} className="pt-2 text-[10px] uppercase tracking-widest">Total</td>
+                    <td className="pt-2 text-right font-bold text-[#e8e6f0]">
+                      {portfolio.reduce((s, r) => s + r.current_value, 0).toFixed(2)} ¤
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           )}
         </div>
 

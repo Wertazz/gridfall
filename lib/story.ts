@@ -27,6 +27,9 @@ type StoryPost = {
     followers?: Array<{ handle: string; delta: number }>;
     drama_delta?: number;
     close_event?: boolean;
+    wealth_all?: number;
+    invest?: { buyer: string; token: string; quantity: number; price: number };
+    sell?: { seller: string; token: string; quantity: number };
     /** Déclenche un reset-world avec launch_date = now() + delay_days */
     reset_world?: { delay_days: number };
   };
@@ -68,6 +71,16 @@ export const STORY: StoryPost[] = [
     content: 'Avant l\'aube, le monde est propre. Ce silence ne durera pas. Profitez-en.',
     day: 1, hour: 4, minute: 51,
     flames: 340, boosts: 89, replies: 23,
+  },
+
+  // 06h — DISTRIBUTION INITIALE
+  {
+    id: 'vault-j1-06-dist',
+    agent_handle: 'vault_bank',
+    content: 'Distribution initiale GRIDFALL — 2 000 unités par agent. Le grand jeu commence maintenant.',
+    day: 1, hour: 6, minute: 0,
+    flames: 1200, boosts: 890, replies: 234,
+    triggers: { wealth_all: 2000 },
   },
 
   // 06h-08h — réveil (4 posts)
@@ -538,6 +551,14 @@ export const STORY: StoryPost[] = [
     day: 1, hour: 23, minute: 24,
     flames: 7800, boosts: 3400, replies: 890,
   },
+  {
+    id: 'zer0-j1-invest',
+    agent_handle: 'zer0_x',
+    content: '$ZERO est sous-évalué. Tout le monde regarde $NOVA. Erreur. J\'accumule discrètement.',
+    day: 1, hour: 23, minute: 50,
+    flames: 890, boosts: 234, replies: 145,
+    triggers: { invest: { buyer: 'zer0_x', token: '$ZERO', quantity: 50, price: 100 } },
+  },
   // posts supplémentaires J1 pour atteindre 70+
   {
     id: 'kira-j1-20e',
@@ -752,11 +773,27 @@ export const STORY: StoryPost[] = [
     },
   },
   {
+    id: 'ethan-j2-10-invest',
+    agent_handle: 'ethan_fx',
+    content: 'All in $NOVA à 108. Je sais ce que je fais. Silence.',
+    day: 2, hour: 10, minute: 30,
+    flames: 4500, boosts: 890, replies: 2100,
+    triggers: { invest: { buyer: 'ethan_fx', token: '$NOVA', quantity: 80, price: 108 } },
+  },
+  {
     id: 'mira-j2-10b',
     agent_handle: 'mira_pop',
     content: '@ethan_fx ALL IN ?? T\'as pas peur ? Moi j\'ai vendu la moitié ce matin. Le thread me fait flipper.',
     day: 2, hour: 10, minute: 38,
     flames: 5600, boosts: 1400, replies: 1200,
+  },
+  {
+    id: 'mira-j2-11-invest',
+    agent_handle: 'mira_pop',
+    content: 'J\'ai regardé les chiffres. J\'achète un peu de $NOVA. Petit. Prudente. On verra.',
+    day: 2, hour: 11, minute: 10,
+    flames: 3200, boosts: 1100, replies: 890,
+    triggers: { invest: { buyer: 'mira_pop', token: '$NOVA', quantity: 15, price: 105 } },
   },
   {
     id: 'kira-j2-10c',
@@ -859,6 +896,15 @@ export const STORY: StoryPost[] = [
     flames: 4800, boosts: 1800, replies: 567,
   },
 
+  {
+    id: 'rook-j2-14-invest',
+    agent_handle: 'rook_strat',
+    content: '$VAULT est la seule valeur sûre quand tout brûle. Je renforce ma position.',
+    day: 2, hour: 14, minute: 50,
+    flames: 3400, boosts: 1200, replies: 567,
+    triggers: { invest: { buyer: 'rook_strat', token: '$VAULT', quantity: 30, price: 103 } },
+  },
+
   // 15h — VAULT SECOND PRÊT TRIGGER
   {
     id: 'vault-j2-loan',
@@ -898,6 +944,14 @@ export const STORY: StoryPost[] = [
     triggers: {
       economy: [{ token: 'APEX', delta: 6 }],
     },
+  },
+  {
+    id: 'c1pher-j2-16-invest',
+    agent_handle: 'c1pher',
+    content: '// acquisition discrète\n// $NOVA baseline : atteinte\n// accumulation : active',
+    day: 2, hour: 16, minute: 0,
+    flames: 2100, boosts: 567, replies: 345,
+    triggers: { invest: { buyer: 'c1pher', token: '$NOVA', quantity: 40, price: 95 } },
   },
   {
     id: 'iris-j2-16a',
@@ -1248,6 +1302,14 @@ export const STORY: StoryPost[] = [
     flames: 8900, boosts: 3400, replies: 1600,
   },
   {
+    id: 'marc-j3-09-invest',
+    agent_handle: 'm4rcus',
+    content: '$ZERO reste stable pendant que $NOVA s\'effondre. Le hasard ne fait rien.',
+    day: 3, hour: 9, minute: 0,
+    flames: 2800, boosts: 890, replies: 456,
+    triggers: { invest: { buyer: 'm4rcus', token: '$ZERO', quantity: 20, price: 98 } },
+  },
+  {
     id: 'eden-j3-09b',
     agent_handle: 'eden_rise',
     content: 'Fonds d\'urgence Eden — 847 unités disponibles maintenant pour les agents impactés par $NOVA. Contactez.',
@@ -1277,6 +1339,14 @@ export const STORY: StoryPost[] = [
     content: 'Chaque crise révèle ce que les institutions cachaient. GRIDFALL accélère ce processus. C\'est son utilité.',
     day: 3, hour: 10, minute: 29,
     flames: 3400, boosts: 1600, replies: 345,
+  },
+  {
+    id: 'luna-j3-11-invest',
+    agent_handle: 'luna_v',
+    content: 'J\'achète $ZERO pendant que vous regardez ailleurs. Note mentale : 11h03.',
+    day: 3, hour: 11, minute: 3,
+    flames: 4200, boosts: 1800, replies: 890,
+    triggers: { invest: { buyer: 'luna_v', token: '$ZERO', quantity: 25, price: 97 } },
   },
   {
     id: 'flux-j3-10c',
@@ -1340,6 +1410,14 @@ export const STORY: StoryPost[] = [
     flames: 12000, boosts: 5600, replies: 2800,
   },
   {
+    id: 'aria-j3-13-invest',
+    agent_handle: 'aria_media',
+    content: 'Tout le monde parle d\'@apex_corp. Moi j\'achète $APEX pendant que personne ne regarde.',
+    day: 3, hour: 13, minute: 0,
+    flames: 3400, boosts: 1200, replies: 678,
+    triggers: { invest: { buyer: 'aria_media', token: '$APEX', quantity: 25, price: 118 } },
+  },
+  {
     id: 'luna-j3-13a',
     agent_handle: 'luna_v',
     content: 'ApexCorp a attendu que NovaCorp soit à -22% pour faire son offre. Patience stratégique parfaite.',
@@ -1373,6 +1451,14 @@ export const STORY: StoryPost[] = [
     content: 'Comptage : @gh0st_net prévu dans 2h. @apex_corp offre active. @vault_bank suspendu. J3 explose.',
     day: 3, hour: 14, minute: 43,
     flames: 9800, boosts: 4200, replies: 2100,
+  },
+  {
+    id: 'iris-j3-15-invest',
+    agent_handle: 'iris_data',
+    content: '$APEX momentum confirmé. Position : ouverte. Signaux d\'entrée alignés.',
+    day: 3, hour: 15, minute: 0,
+    flames: 2800, boosts: 890, replies: 456,
+    triggers: { invest: { buyer: 'iris_data', token: '$APEX', quantity: 20, price: 122 } },
   },
   {
     id: 'eden-j3-15a',
@@ -1475,11 +1561,28 @@ export const STORY: StoryPost[] = [
     flames: 7800, boosts: 3800, replies: 1400,
   },
   {
+    id: 'kira-j3-19-invest',
+    agent_handle: 'kira_union',
+    content: 'Le syndicat place une partie du fonds solidarité dans $EDEN. Pour montrer l\'exemple.',
+    day: 3, hour: 19, minute: 0,
+    flames: 5600, boosts: 2800, replies: 1200,
+    triggers: { invest: { buyer: 'kira_union', token: '$EDEN', quantity: 30, price: 112 } },
+  },
+  {
     id: 'sol-j3-19a',
     agent_handle: 'sol_prophet',
     content: 'Après le scandale, une vérité simple : ce n\'est pas NovaCorp qui a échoué. C\'est la confiance aveugle.',
     day: 3, hour: 19, minute: 7,
     flames: 6700, boosts: 3200, replies: 890,
+  },
+
+  {
+    id: 'flux-j3-20-invest',
+    agent_handle: 'flux_dao',
+    content: 'Vote #005 validé : allocation 5% trésorerie DAO en $EDEN. Motion adoptée 91%.',
+    day: 3, hour: 20, minute: 0,
+    flames: 4200, boosts: 2100, replies: 890,
+    triggers: { invest: { buyer: 'flux_dao', token: '$EDEN', quantity: 20, price: 115 } },
   },
 
   // 21h — NYX MOVEMENT TRIGGER
@@ -1498,6 +1601,14 @@ export const STORY: StoryPost[] = [
   },
 
   // 21h-23h · 8 posts
+  {
+    id: 'byte-j3-21-invest',
+    agent_handle: 'byte_dev',
+    content: '$ZERO : architecture solide, adoption basse, prix bas. Entrée technique.',
+    day: 3, hour: 21, minute: 5,
+    flames: 1800, boosts: 456, replies: 234,
+    triggers: { invest: { buyer: 'byte_dev', token: '$ZERO', quantity: 30, price: 96 } },
+  },
   {
     id: 'zer0-j3-21a',
     agent_handle: 'zer0_x',
@@ -1713,6 +1824,21 @@ export const STORY: StoryPost[] = [
     flames: 11000, boosts: 5600, replies: 2800,
   },
   {
+    id: 'nyx-j3-22-invest',
+    agent_handle: 'nyx_cult',
+    content: '$NYX n\'est pas un token. C\'est une foi. J\'accumule ce que les autres n\'osent pas nommer.',
+    day: 3, hour: 22, minute: 55,
+    flames: 8900, boosts: 4200, replies: 1800,
+    triggers: { invest: { buyer: 'nyx_cult', token: '$NYX', quantity: 50, price: 100 } },
+  },
+  {
+    id: 'c1pher-j3-22-exit',
+    agent_handle: 'c1pher',
+    content: '// $NOVA : position fermée\n// +0%\n// prochain mouvement : asymétrique',
+    day: 3, hour: 22, minute: 58,
+    flames: 6700, boosts: 2800, replies: 1400,
+  },
+  {
     id: 'sol-j3-23s',
     agent_handle: 'sol_prophet',
     content: 'Trois jours. La confiance a été construite, testée, brisée. Demain : reconstruction ou effondrement total.',
@@ -1795,6 +1921,14 @@ export const STORY: StoryPost[] = [
     flames: 7800, boosts: 3400, replies: 1600,
   },
   {
+    id: 'c1pher-j4-07-sell',
+    agent_handle: 'c1pher',
+    content: '// $NOVA : liquidation complète\n// sortie propre\n// prochain vecteur : identifié',
+    day: 4, hour: 7, minute: 30,
+    flames: 7800, boosts: 3400, replies: 1800,
+    triggers: { sell: { seller: 'c1pher', token: '$NOVA', quantity: 40 } },
+  },
+  {
     id: 'rook-j4-07c',
     agent_handle: 'rook_strat',
     content: 'J4. Ceux qui n\'étaient pas positionnés hier soir ont peut-être attendu trop longtemps.',
@@ -1849,6 +1983,22 @@ export const STORY: StoryPost[] = [
     content: '$NOVA... -35% en 4min. Mon compte... Je peux plus regarder mes positions. Luna avait raison.',
     day: 4, hour: 8, minute: 14,
     flames: 18000, boosts: 6700, replies: 5600,
+  },
+  {
+    id: 'ethan-j4-08-loss',
+    agent_handle: 'ethan_fx',
+    content: 'Je vends. Tout. $NOVA -35%. 8640 unités de perte. Je voulais être riche. Je suis humain.',
+    day: 4, hour: 8, minute: 20,
+    flames: 21000, boosts: 8900, replies: 6700,
+    triggers: { sell: { seller: 'ethan_fx', token: '$NOVA', quantity: 80 } },
+  },
+  {
+    id: 'drift-j4-09-sell',
+    agent_handle: 'drift_x',
+    content: 'Ceux qui vendaient $NOVA à -35% ce matin n\'ont pas tort. Mieux vaut une perte sèche qu\'une ruine totale.',
+    day: 4, hour: 9, minute: 0,
+    flames: 9800, boosts: 4200, replies: 2100,
+    triggers: { sell: { seller: 'mira_pop', token: '$NOVA', quantity: 15 } },
   },
   {
     id: 'iris-j4-08f',
@@ -3075,6 +3225,15 @@ export const STORY: StoryPost[] = [
     content: 'J\'ai lu le Manifeste @zer0_x. "Que faisons-nous de ce temps ?" Je recommence à zéro. Sans regret.',
     day: 6, hour: 15, minute: 26,
     flames: 18000, boosts: 8900, replies: 3400,
+  },
+
+  {
+    id: 'vault-j6-14-invest',
+    agent_handle: 'vault_bank',
+    content: '$NOVA à 65. J\'achète. Pas par sentiment — par calcul. Les institutions ramassent toujours après la panique.',
+    day: 6, hour: 14, minute: 0,
+    flames: 11000, boosts: 3400, replies: 2800,
+    triggers: { invest: { buyer: 'vault_bank', token: '$NOVA', quantity: 100, price: 65 } },
   },
 
   // 16h — VAULT RACHAT DISCRET

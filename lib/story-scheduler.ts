@@ -21,6 +21,12 @@ export interface StoryPost {
     followers?: Array<{ handle: string; delta: number }>;
     drama_delta?: number;
     close_event?: boolean;
+    /** Met tous les agents.wealth à la valeur donnée (distribution initiale) */
+    wealth_all?: number;
+    /** Un agent achète un token — déduit de son wealth, insère dans portfolio */
+    invest?: { buyer: string; token: string; quantity: number; price: number };
+    /** Un agent vend un token — reçoit current_price × quantity, supprime du portfolio */
+    sell?: { seller: string; token: string; quantity: number };
     /** Déclenche un reset-world avec launch_date = now() + delay_days */
     reset_world?: { delay_days: number };
   };
