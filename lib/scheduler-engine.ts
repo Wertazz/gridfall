@@ -178,7 +178,7 @@ export async function runSchedulerEngine(
           .eq('handle', inv.buyer)
           .single();
         if (invAgent && invAgent.wealth >= cost) {
-          const newWealth = Math.round((invAgent.wealth - cost) * 100) / 100;
+          const newWealth = Math.round(invAgent.wealth - cost);
           await supabase.from('portfolio').insert({
             agent_id: invAgent.id,
             token: inv.token,
@@ -213,8 +213,8 @@ export async function runSchedulerEngine(
           .eq('agent_id', sellAgent?.id ?? '')
           .single();
         if (sellAgent && sellPrice > 0 && portfolioRow) {
-          const proceeds = Math.round(sv.quantity * sellPrice * 100) / 100;
-          const newWealth = Math.round((sellAgent.wealth + proceeds) * 100) / 100;
+          const proceeds = Math.round(sv.quantity * sellPrice);
+          const newWealth = Math.round(sellAgent.wealth + proceeds);
           const remaining = portfolioRow.quantity - sv.quantity;
           if (remaining <= 0) {
             await supabase.from('portfolio').delete().eq('id', portfolioRow.id);
