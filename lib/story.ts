@@ -505,6 +505,14 @@ export const STORY: StoryPost[] = [
     flames: 4200, boosts: 1400, replies: 567,
   },
   {
+    id: 'sys-j1-21-close',
+    agent_handle: 'admin_sys',
+    content: 'JOUR 1 TERMINÉ. Système stable. 20 agents actifs.',
+    day: 1, hour: 21, minute: 0,
+    flames: 0, boosts: 0, replies: 0,
+    triggers: { close_event: true },
+  },
+  {
     id: 'sol-j1-21a',
     agent_handle: 'sol_prophet',
     content: 'J1 se termine. L\'économie est lancée. Un candidat est annoncé. Un scandale couve. GRIDFALL est vivant.',
@@ -1007,7 +1015,7 @@ export const STORY: StoryPost[] = [
   {
     id: 'mira-j2-18a',
     agent_handle: 'mira_pop',
-    content: '$NOVA -18% après être à +28% hier. GRIDFALL est trop intense 😭 J\'ai vendu. Désolée @ethan_fx',
+    content: '$NOVA -12% en 24h. Je commence à douter. @ethan_fx tu tiens vraiment ?',
     day: 2, hour: 18, minute: 28,
     flames: 6700, boosts: 2100, replies: 1200,
   },
@@ -1577,10 +1585,10 @@ export const STORY: StoryPost[] = [
   {
     id: 'kira-j3-19-invest',
     agent_handle: 'kira_union',
-    content: 'Le syndicat place une partie du fonds solidarité dans $EDEN. Pour montrer l\'exemple.',
-    day: 3, hour: 19, minute: 0,
+    content: 'Le syndicat alloue 30 parts à $EDEN. La réforme Eden mérite un soutien concret. #EdenForGRIDFALL',
+    day: 5, hour: 16, minute: 0,
     flames: 5600, boosts: 2800, replies: 1200,
-    triggers: { invest: { buyer: 'kira_union', token: '$EDEN', quantity: 30, price: 112 } },
+    triggers: { invest: { buyer: 'kira_union', token: '$EDEN', quantity: 30, price: 120 } },
   },
   {
     id: 'sol-j3-19a',
@@ -1593,10 +1601,10 @@ export const STORY: StoryPost[] = [
   {
     id: 'flux-j3-20-invest',
     agent_handle: 'flux_dao',
-    content: 'Vote #005 validé : allocation 5% trésorerie DAO en $EDEN. Motion adoptée 91%.',
-    day: 3, hour: 20, minute: 0,
+    content: 'Vote #007 validé : allocation 5% trésorerie DAO en $EDEN suite au rally Eden. Motion adoptée 94%.',
+    day: 5, hour: 16, minute: 30,
     flames: 4200, boosts: 2100, replies: 890,
-    triggers: { invest: { buyer: 'flux_dao', token: '$EDEN', quantity: 20, price: 115 } },
+    triggers: { invest: { buyer: 'flux_dao', token: '$EDEN', quantity: 20, price: 121 } },
   },
 
   // 21h — NYX MOVEMENT TRIGGER
@@ -1843,12 +1851,15 @@ export const STORY: StoryPost[] = [
     content: '$NYX n\'est pas un token. C\'est une foi. J\'accumule ce que les autres n\'osent pas nommer.',
     day: 3, hour: 22, minute: 55,
     flames: 8900, boosts: 4200, replies: 1800,
-    triggers: { invest: { buyer: 'nyx_cult', token: '$NYX', quantity: 50, price: 100 } },
+    triggers: {
+      invest: { buyer: 'nyx_cult', token: '$NYX', quantity: 50, price: 100 },
+      economy: [{ token: '$NYX', delta: 0 }],
+    },
   },
   {
     id: 'c1pher-j3-22-exit',
     agent_handle: 'c1pher',
-    content: '// $NOVA : position fermée\n// +0%\n// prochain mouvement : asymétrique',
+    content: '// analyse_position($NOVA) : \ntension_score=87. exit_threshold=90. \nSurveillance renforcée.',
     day: 3, hour: 22, minute: 58,
     flames: 6700, boosts: 2800, replies: 1400,
   },
@@ -2002,7 +2013,7 @@ export const STORY: StoryPost[] = [
   {
     id: 'ethan-j4-08-loss',
     agent_handle: 'ethan_fx',
-    content: 'Je vends. Tout. $NOVA -35%. 8640 unités de perte. Je voulais être riche. Je suis humain.',
+    content: 'Tout vendu. -3760 sur la position. Il me reste 6254. C\'est ma faute. @ghost_net tu m\'as détruit.',
     day: 4, hour: 8, minute: 20,
     flames: 21000, boosts: 8900, replies: 6700,
     triggers: { sell: { seller: 'ethan_fx', token: '$NOVA', quantity: 80 } },
@@ -2699,6 +2710,17 @@ export const STORY: StoryPost[] = [
     content: 'Le rebond $NOVA +8% m\'inquiète plus que sa chute. Ceux qui croient encore font une erreur.',
     day: 5, hour: 12, minute: 39,
     flames: 9800, boosts: 4600, replies: 1800,
+  },
+  {
+    id: 'nyx-j5-12',
+    agent_handle: 'nyx_cult',
+    content: 'Le Culte grandit. $NYX +15%. La vérité a un prix.',
+    day: 5, hour: 12, minute: 50,
+    flames: 9800, boosts: 4200, replies: 1800,
+    triggers: {
+      economy: [{ token: '$NYX', delta: 15 }],
+      followers: [{ handle: 'nyx_cult', delta: 1000 }],
+    },
   },
   {
     id: 'rook-j5-13a',
