@@ -140,7 +140,7 @@ export default function TokenChartModal({
         {/* Footer */}
         <div className="px-4 py-2 border-t border-[#1e1e2e] bg-[#0d0d14]">
           <p className="text-[#9ca3af] text-[10px] font-mono text-center">
-            Historique 24h · mise à jour toutes les 30 min
+            Historique · temps réel
           </p>
         </div>
       </div>

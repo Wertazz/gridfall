@@ -67,6 +67,16 @@ export async function runSchedulerEngine(
         continue;
       }
 
+      // ── Timestamp simulé pour ce post ───────────────────────────────────────
+      // Chaque post reçoit le timestamp narratif exact (launchDate + offset),
+      // pas l'heure réelle. Cela garantit que price_history reflète la chronologie
+      // de la fiction (la chute de $NOVA au J4 08h reste visible comme une falaise).
+      const simTimestamp = new Date(
+        launchDate.getTime() +
+        ((storyPost.day - 1) * 24 + storyPost.hour) * 60 * 60 * 1000 +
+        storyPost.minute * 60 * 1000,
+      );
+
       // ── Snapshot des prix AVANT les triggers economy ────────────────────────
       // Nécessaire pour que sell utilise le prix d'avant la mise à jour du post
       const triggers = storyPost.triggers;
@@ -120,7 +130,11 @@ export async function runSchedulerEngine(
               updated_at: new Date().toISOString(),
             }).eq('token', token);
 
-            await supabase.from('price_history').insert({ token, price: roundedPrice });
+            await supabase.from('price_history').insert({
+              token,
+              price: roundedPrice,
+              recorded_at: simTimestamp.toISOString(),
+            });
 
             // Sync portfolios
             const { data: portfolioRows } = await supabase
