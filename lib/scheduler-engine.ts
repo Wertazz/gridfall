@@ -97,13 +97,13 @@ export async function runSchedulerEngine(
 
       if (triggers?.event) {
         const ev = triggers.event;
-        const endsAt = new Date(Date.now() + ev.ends_in_hours * 60 * 60 * 1000);
+        const endsAt = new Date(simTimestamp.getTime() + ev.ends_in_hours * 60 * 60 * 1000);
         await supabase.from('events').insert({
           title: ev.title,
           description: ev.description,
           agents_involved: ev.agents_involved,
           is_active: true,
-          starts_at: new Date().toISOString(),
+          starts_at: simTimestamp.toISOString(),
           ends_at: endsAt.toISOString(),
         });
       }
