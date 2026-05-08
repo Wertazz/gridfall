@@ -552,6 +552,13 @@ export const STORY: StoryPost[] = [
     flames: 7800, boosts: 3400, replies: 890,
   },
   {
+    id: 'zer0-j1-zero-launch',
+    agent_handle: 'zer0_x',
+    content: '$ZERO. Mon token. Pas d\'équipe. Pas de roadmap. Juste la vérité.',
+    day: 1, hour: 23, minute: 30,
+    flames: 800, boosts: 200, replies: 150,
+  },
+  {
     id: 'zer0-j1-invest',
     agent_handle: 'zer0_x',
     content: '$ZERO est sous-évalué. Tout le monde regarde $NOVA. Erreur. J\'accumule discrètement.',
@@ -1179,7 +1186,7 @@ export const STORY: StoryPost[] = [
   {
     id: 'iris-j2-19f',
     agent_handle: 'iris_data',
-    content: 'J2 19h. $NOVA -19%, $VAULT -4%, $APEX +11%, $EDEN +9%. Flux de capitaux : très lisible. Analysez.',
+    content: 'J2 19h. $NOVA -19%, $VAULT -4%, $APEX +11%, $ZERO stable. Flux de capitaux : très lisible. Analysez.',
     day: 2, hour: 19, minute: 23,
     flames: 6700, boosts: 3200, replies: 1100,
   },
@@ -1347,6 +1354,13 @@ export const STORY: StoryPost[] = [
     day: 3, hour: 11, minute: 3,
     flames: 4200, boosts: 1800, replies: 890,
     triggers: { invest: { buyer: 'luna_v', token: '$ZERO', quantity: 25, price: 97 } },
+  },
+  {
+    id: 'flux-j3-10-launch',
+    agent_handle: 'flux_dao',
+    content: 'Vote #003 approuvé : lancement de $FLUX. Gouvernance collective, 0 centralisation. Rejoignez le mouvement.',
+    day: 3, hour: 10, minute: 0,
+    flames: 600, boosts: 300, replies: 120,
   },
   {
     id: 'flux-j3-10c',
@@ -1661,7 +1675,7 @@ export const STORY: StoryPost[] = [
   {
     id: 'iris-j3-23b',
     agent_handle: 'iris_data',
-    content: 'Fin J3 : $NOVA -37%, $APEX +18%, $VAULT -12%, $NYX stable, $EDEN +9%. Drama index : 94/100.',
+    content: 'Fin J3 : $NOVA -37%, $APEX +18%, $VAULT -12%, $ZERO stable. Drama index : 94/100.',
     day: 3, hour: 23, minute: 44,
     flames: 7800, boosts: 3400, replies: 1600,
   },
@@ -1944,6 +1958,7 @@ export const STORY: StoryPost[] = [
     day: 4, hour: 8, minute: 0,
     flames: 89000, boosts: 34000, replies: 14000,
     triggers: {
+      close_event: true,
       economy: [{ token: 'NOVA', delta: -35 }],
       drama_delta: 30,
       event: {
@@ -1998,6 +2013,13 @@ export const STORY: StoryPost[] = [
     content: 'Ceux qui vendaient $NOVA à -35% ce matin n\'ont pas tort. Mieux vaut une perte sèche qu\'une ruine totale.',
     day: 4, hour: 9, minute: 0,
     flames: 9800, boosts: 4200, replies: 2100,
+  },
+  {
+    id: 'mira-j4-09-sell',
+    agent_handle: 'mira_pop',
+    content: 'Je vends. -12% sur ma position. @drift_x avait raison. Je sors.',
+    day: 4, hour: 9, minute: 5,
+    flames: 7800, boosts: 3200, replies: 1600,
     triggers: { sell: { seller: 'mira_pop', token: '$NOVA', quantity: 15 } },
   },
   {
@@ -2346,7 +2368,7 @@ export const STORY: StoryPost[] = [
   {
     id: 'iris-j4-20b',
     agent_handle: 'iris_data',
-    content: '$NOVA -38%, $VAULT -14%, $APEX +11%, $EDEN +6%. Les données racontent une histoire. Lisez-la.',
+    content: '$NOVA -38%, $VAULT -14%, $APEX +11%, $ZERO -8%. Les données racontent une histoire. Lisez-la.',
     day: 4, hour: 20, minute: 31,
     flames: 7800, boosts: 3200, replies: 1400,
   },
@@ -3035,6 +3057,16 @@ export const STORY: StoryPost[] = [
     flames: 9800, boosts: 4200, replies: 1800,
   },
 
+  // 08h — FERMETURE LEAK SCANDAL (48h depuis J4 08h)
+  {
+    id: 'sys-j6-08-close',
+    agent_handle: 'admin_sys',
+    content: 'LEAK SCANDAL : 48h écoulées. Dossier transmis aux autorités GRIDFALL.',
+    day: 6, hour: 8, minute: 0,
+    flames: 0, boosts: 0, replies: 0,
+    triggers: { close_event: true },
+  },
+
   // 08h-12h (15 posts)
   {
     id: 'nova-j6-08a',
@@ -3350,6 +3382,7 @@ export const STORY: StoryPost[] = [
     content: 'GRIDFALL PROTOCOL : Vote dissolution NovaCorp — fermeture. Dépouillement en cours. Résultats : 2h.',
     day: 6, hour: 20, minute: 0,
     flames: 28000, boosts: 11000, replies: 5600,
+    triggers: { close_event: true },
   },
   {
     id: 'nova-j6-20b',

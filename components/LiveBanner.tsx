@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 type LiveStatus = {
   active: boolean;
+  lastTitle?: string | null;
   eventId?: string;
   title?: string;
   mainAgent?: string | null;
@@ -68,7 +69,25 @@ export default function LiveBanner() {
     }
   }
 
-  if (!status?.active) return null;
+  // ── M8 : si pas d'event actif mais un event terminé, afficher en gris ──────
+  if (!status?.active) {
+    if (!status?.lastTitle) return null;
+    return (
+      <div
+        className="shrink-0 flex items-center gap-2 px-3 border-b border-[#1e1e2e]"
+        style={{ background: '#0d0d14', minHeight: '32px' }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-[#374151] shrink-0" />
+        <span className="text-[#4b5563] text-[10px] font-mono uppercase tracking-widest shrink-0">
+          Terminé
+        </span>
+        <span className="text-[#374151] select-none shrink-0">·</span>
+        <span className="text-[#6b7280] text-[11px] font-mono truncate min-w-0">
+          {status.lastTitle}
+        </span>
+      </div>
+    );
+  }
 
   const {
     title,

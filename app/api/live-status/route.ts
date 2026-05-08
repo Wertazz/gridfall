@@ -6,16 +6,31 @@ export const revalidate = 0;
 export async function GET() {
   const supabase = createServiceClient();
 
-  const { data: event } = await supabase
+  // ── C3 fix : limit(1) + order au lieu de .single() ─────────────────────────
+  // Évite le crash si deux events sont actifs simultanément (ex: J5 20h-J6 08h)
+  const { data: activeEvents } = await supabase
     .from('events')
     .select('id, title, agents_involved, ends_at')
     .eq('is_active', true)
-    .single();
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-  if (!event) return Response.json({ active: false });
+  const event = activeEvents?.[0] ?? null;
 
-  const shortTitle = event.title; // titre complet, pas de troncature
+  // ── M8 : si aucun event actif, retourner le dernier terminé ────────────────
+  if (!event) {
+    const { data: lastEvents } = await supabase
+      .from('events')
+      .select('title')
+      .eq('is_active', false)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
+    const lastTitle = lastEvents?.[0]?.title ?? null;
+    return Response.json({ active: false, lastTitle });
+  }
+
+  const shortTitle = event.title;
   const mainAgent = (event.agents_involved as string[])?.[0] ?? null;
 
   // Vote counts
