@@ -54,13 +54,30 @@ export default function EconomyPanel() {
       } catch { /* silencieux */ }
     }
 
-    async function init() {
-      const { data: tokData } = await supabase
-        .from('economy')
-        .select('token, price, change_24h, updated_at, agents(name, color)')
-        .order('price', { ascending: false });
+    /**
+     * Récupère la liste des tokens actifs via /api/active-tokens
+     * (union economy non-neutre + portfolio), puis charge leurs données
+     * complètes depuis la table economy.
+     */
+    async function fetchTokens() {
+      try {
+        const res = await fetch('/api/active-tokens');
+        if (!res.ok) return;
+        const { tokens: activeList } = await res.json() as { tokens: string[] };
+        if (!activeList?.length) { setTokens([]); return; }
 
-      if (tokData) setTokens(tokData as unknown as TokenRow[]);
+        const { data } = await supabase
+          .from('economy')
+          .select('token, price, change_24h, updated_at, agents(name, color)')
+          .in('token', activeList)
+          .order('price', { ascending: false });
+
+        if (data) setTokens(data as unknown as TokenRow[]);
+      } catch { /* silencieux */ }
+    }
+
+    async function init() {
+      await fetchTokens();
       await Promise.all([fetchDrama(), fetchHighlights()]);
       setLoading(false);
     }
@@ -69,32 +86,29 @@ export default function EconomyPanel() {
 
     // Recalcul du drama toutes les 30s
     const dramaInterval = setInterval(fetchDrama, 30_000);
+    // Refresh des tokens toutes les 60s (nouveaux portfolios)
+    const tokenInterval = setInterval(fetchTokens, 60_000);
 
     const channel = supabase
       .channel('economy-realtime')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'economy' },
-        (payload) => {
-          setTokens((prev) =>
-            prev.map((t) =>
-              t.token === payload.new.token
-                ? { ...t, price: payload.new.price, change_24h: payload.new.change_24h }
-                : t
-            )
-          );
-          fetchDrama(); // recalcul immédiat si token bouge
+        () => {
+          fetchTokens(); // re-fetch complet : peut activer de nouveaux tokens
+          fetchDrama();
         }
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' },
         () => { fetchDrama(); fetchHighlights(); }
       )
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' },
-        () => { fetchDrama(); } // nouveau post peut créer un viral
+        () => { fetchDrama(); }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(dramaInterval);
+      clearInterval(tokenInterval);
     };
   }, []);
 
@@ -198,17 +212,17 @@ export default function EconomyPanel() {
               </div>
             </div>
           ))
-        ) : tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).length === 0 ? (
+        ) : tokens.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-24 gap-1 px-3">
             <span className="text-[#4b5563] text-[10px] font-mono text-center">
-              Aucun token créé pour l&apos;instant.
+              Aucun token actif pour l&apos;instant.
             </span>
             <span className="text-[#2a2a3a] text-[9px] font-mono text-center">
-              Les tokens apparaissent dès que les prix bougent.
+              Les tokens apparaissent dès qu&apos;un agent en achète.
             </span>
           </div>
         ) : (
-          tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).map((tok) => {
+          tokens.map((tok) => {
             const isPositive = tok.change_24h >= 0;
             const color = tok.agents?.color ?? '#9ca3af';
             return (
@@ -255,7 +269,7 @@ export default function EconomyPanel() {
         <p className="text-[#4a4a6a] text-[10px] font-mono text-center">
           {loading
             ? 'Chargement...'
-            : `${tokens.filter((t) => !(t.price === 100 && t.change_24h === 0)).length} tokens actifs`}
+            : `${tokens.length} tokens actifs`}
         </p>
       </div>
 
