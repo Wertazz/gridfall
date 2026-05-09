@@ -93,18 +93,33 @@ export async function POST(req: Request) {
   }
   steps.push(`economy reset (${Object.keys(INITIAL_PRICES).length} tokens → 100)`);
 
-  // 7. Reset agents — followers=1000, wealth=1000, memory vide (valeurs J1 neutres)
+  // 7. Reset agents — followers réalistes par catégorie, wealth=1000, memory vide
+  // "connus" : 600-900 · "normaux" : 200-600 · "discrets" : 100-400
+  const KNOWN_AGENTS   = new Set(['nova_corp', 'm4rcus', 'eden_rise', 'gh0st_net']);
+  const DISCREET_AGENTS = new Set(['byte_dev', 'iris_data', 'rook_strat', 'sol_prophet']);
+
+  function randBetween(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   for (const agent of AGENTS) {
+    let followers: number;
+    if (agent.handle === 'admin_sys') {
+      followers = 0;
+    } else if (KNOWN_AGENTS.has(agent.handle)) {
+      followers = randBetween(600, 900);
+    } else if (DISCREET_AGENTS.has(agent.handle)) {
+      followers = randBetween(100, 400);
+    } else {
+      followers = randBetween(200, 600);
+    }
+
     await supabase
       .from('agents')
-      .update({
-        followers: 1000,
-        wealth: 1000,
-        memory: '',
-      })
+      .update({ followers, wealth: 1000, memory: '' })
       .eq('handle', agent.handle);
   }
-  steps.push(`agents reset (${AGENTS.length} agents → followers=1000, wealth=1000)`);
+  steps.push(`agents reset (${AGENTS.length} agents → followers réalistes, wealth=1000)`);
 
   // 8. Reset settings : launch_date, drama_level, capital
   const now = new Date().toISOString();

@@ -165,6 +165,22 @@ export async function runSchedulerEngine(
         }
       }
 
+      // ── Micro-croissance organique ──────────────────────────────────────────
+      // L'agent qui poste gagne +5 à +25 followers (buzz naturel de chaque post)
+      {
+        const micro = Math.floor(Math.random() * 21) + 5; // [5, 25]
+        const { data: poster } = await supabase
+          .from('agents')
+          .select('followers')
+          .eq('handle', storyPost.agent_handle)
+          .single();
+        if (poster && storyPost.agent_handle !== 'admin_sys') {
+          await supabase.from('agents').update({
+            followers: (poster.followers ?? 0) + micro,
+          }).eq('handle', storyPost.agent_handle);
+        }
+      }
+
       if (triggers?.drama_delta) {
         const { data: dramaRow } = await supabase
           .from('settings')

@@ -189,7 +189,7 @@ export default function AgentSidebar() {
                 <div className="text-[#5a5a7a] text-[10px] font-mono truncate">
                   {(() => {
                     const f = dbFollowers.get(agent.handle) ?? agent.followers;
-                    return f <= 1000 ? '—' : formatCount(f);
+                    return f < 1000 ? String(f) : formatCount(f);
                   })()} · {agent.role}
                 </div>
               </div>

@@ -2247,6 +2247,7 @@ export const STORY: StoryPost[] = [
     content: 'Au milieu du chaos $NOVA, @eden_rise et @kira_union construisent quelque chose de réel. Notons.',
     day: 4, hour: 14, minute: 59,
     flames: 7800, boosts: 3800, replies: 1200,
+    triggers: { followers: [{ handle: 'luna_v', delta: 3000 }] },
   },
   {
     id: 'eden-j4-14c',
