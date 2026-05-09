@@ -220,6 +220,7 @@ export async function runSchedulerEngine(
           await supabase.from('wealth_snapshots').insert({
             agent_handle: inv.buyer,
             wealth: newWealth,
+            recorded_at: simTimestamp.toISOString(),
           });
         }
       }
@@ -262,6 +263,7 @@ export async function runSchedulerEngine(
           await supabase.from('wealth_snapshots').insert({
             agent_handle: sv.seller,
             wealth: newWealth,
+            recorded_at: simTimestamp.toISOString(),
           });
         } else {
           errors.push(
@@ -273,6 +275,24 @@ export async function runSchedulerEngine(
       }
 
       // reset_world ignoré dans jump-to-day (pas de récursion)
+
+      // ── Snapshot de fortune (graphique agent) ───────────────────────────────
+      // Inséré après tous les triggers → capture la wealth réelle post-opération.
+      // Le simTimestamp garantit la cohérence avec la timeline narrative.
+      if (storyPost.agent_handle !== 'admin_sys') {
+        const { data: posterNow } = await supabase
+          .from('agents')
+          .select('wealth')
+          .eq('handle', storyPost.agent_handle)
+          .single();
+        if (posterNow) {
+          await supabase.from('wealth_snapshots').insert({
+            agent_handle: storyPost.agent_handle,
+            wealth: posterNow.wealth,
+            recorded_at: simTimestamp.toISOString(),
+          });
+        }
+      }
 
       // Log story_log
       await supabase.from('story_log').insert({ story_id: storyPost.id });

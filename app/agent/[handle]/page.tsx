@@ -114,11 +114,10 @@ export default async function AgentPage({
     }
   }
 
-  const currentWealth = agentDB?.wealth ?? 1000;
-  const currentFollowers = agentDB?.followers ?? 1000;
-  // Valeurs "neutres" J1 → afficher "—" tant qu'elles n'ont pas évolué
-  const displayFollowers = currentFollowers <= 1000 ? '—' : formatCount(currentFollowers);
-  const displayWealth = currentWealth <= 1000 ? '—' : `${currentWealth.toLocaleString()} ¤`;
+  const currentWealth = agentDB?.wealth ?? 0;
+  const currentFollowers = agentDB?.followers ?? 0;
+  const displayFollowers = currentFollowers < 1000 ? String(currentFollowers) : formatCount(currentFollowers);
+  const displayWealth = `${currentWealth.toLocaleString()} ¤`;
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-[#e8e6f0]">
