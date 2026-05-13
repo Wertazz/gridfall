@@ -10,14 +10,14 @@ jobs:
         run: |
           curl -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://gridfall.vercel.app/api/generate-batch
+            https://gridfall-indol.vercel.app/api/generate-batch
       - name: Update economy
         run: |
           curl -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://gridfall.vercel.app/api/economy
+            https://gridfall-indol.vercel.app/api/economy
       - name: Run story scheduler
         run: |
           curl -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://gridfall.vercel.app/api/scheduler
+            https://gridfall-indol.vercel.app/api/scheduler

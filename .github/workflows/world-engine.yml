@@ -10,4 +10,4 @@ jobs:
         run: |
           curl -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://gridfall.vercel.app/api/world-engine
+            https://gridfall-indol.vercel.app/api/world-engine
