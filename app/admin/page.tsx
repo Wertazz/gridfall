@@ -12,13 +12,13 @@ export default function AdminPage() {
   const [adminKey, setAdminKey] = useState('');
   const [logs, setLogs]         = useState<LogLine[]>([]);
   const [busy, setBusy]         = useState(false);
-  const [day, setDay]           = useState(1);
+  const [day, setDay]           = useState(2);
 
   function log(text: string, ok = true) {
     setLogs((prev) => [{ ts: ts(), text, ok }, ...prev]);
   }
 
-  async function call(action: string, extraDay?: number) {
+  async function post(action: string, extraDay?: number) {
     if (busy || !adminKey) return;
     setBusy(true);
     try {
@@ -28,18 +28,22 @@ export default function AdminPage() {
         body: JSON.stringify({ key: adminKey, action, day: extraDay }),
       });
       const data = await res.json();
-      if (res.status === 401) {
-        log('[auth] Clé incorrecte', false);
-        return;
-      }
-      if (!res.ok) {
-        log(`[${action}] ERREUR : ${data.error ?? res.status}`, false);
-      } else if (action === 'reset') {
+      if (res.status === 401) { log('[auth] Clé incorrecte', false); return; }
+      if (!res.ok) { log(`[${action}] ERREUR : ${data.error ?? res.status}`, false); return; }
+
+      if (action === 'reset') {
         log(`[reset] OK — launch_date=${data.new_launch_date ?? '?'}`);
-        if (data.errors?.length) data.errors.forEach((e: string) => log(`  ↳ ${e}`, false));
+        data.errors?.forEach((e: string) => log(`  ↳ ${e}`, false));
+
+      } else if (action === 'reset_and_boot') {
+        log(`[reset+boot] OK — launch_date=${data.new_launch_date ?? '?'}`);
+        log(`  ↳ boot : ${data.boot?.published ?? 0} post(s) J1H0 publiés`);
+        data.reset?.errors?.forEach((e: string) => log(`  ↳ reset: ${e}`, false));
+        data.boot?.errors?.forEach((e: string) => log(`  ↳ boot: ${e}`, false));
+
       } else {
-        log(`[jump j${extraDay}] ${data.published} post(s) publiés`);
-        if (data.errors?.length) data.errors.forEach((e: string) => log(`  ↳ ${e}`, false));
+        log(`[jump J${extraDay}] ${data.published} post(s) publiés`);
+        data.errors?.forEach((e: string) => log(`  ↳ ${e}`, false));
       }
     } catch (err) {
       log(`[${action}] Exception : ${String(err)}`, false);
@@ -48,23 +52,22 @@ export default function AdminPage() {
     }
   }
 
+  async function handleBoot() {
+    if (!confirm('Reset complet + publier les posts du Jour 1 Heure 0 ?')) return;
+    log('Reset + boot J1H0…');
+    await post('reset_and_boot');
+  }
+
   async function handleReset() {
-    if (!confirm('Remettre la simulation à zéro (J1) ?')) return;
-    log('Lancement reset-world…');
-    await call('reset');
+    if (!confirm('Reset complet (DB vide, aucun post publié) ?')) return;
+    log('Reset seul…');
+    await post('reset');
   }
 
   async function handleJump() {
+    if (!confirm(`Publier tous les posts jusqu'au Jour ${day} (sans reset) ?`)) return;
     log(`Saut au Jour ${day}…`);
-    await call('jump', day);
-  }
-
-  async function handleResetThenJump() {
-    if (!confirm(`Reset complet puis sauter au Jour ${day} ?`)) return;
-    log('Lancement reset-world…');
-    await call('reset');
-    log(`Saut au Jour ${day}…`);
-    await call('jump', day);
+    await post('jump', day);
   }
 
   const locked = !adminKey || busy;
@@ -106,31 +109,51 @@ export default function AdminPage() {
         {/* Actions */}
         <div className="space-y-4 mb-8">
 
-          {/* Reset */}
-          <div className="border border-[#1e1e2e] rounded bg-[#0d0d14] p-4">
-            <h2 className="text-[#9ca3af] text-[10px] tracking-widest uppercase mb-3">
-              Reset simulation
+          {/* ⟳ Lancement propre (action principale) */}
+          <div className="border border-[#00ff88]/20 rounded bg-[#050f05] p-4">
+            <h2 className="text-[#00ff88] text-[10px] tracking-widest uppercase mb-2">
+              ⟳ Lancement propre — action principale
             </h2>
             <p className="text-[#4b5563] text-xs mb-4">
-              Supprime posts, events, price_history, wealth_snapshots, portfolios, story_log.
-              Remet les agents à wealth=1000, followers aléatoires, launch_date=now.
+              Reset complet de la DB, puis publication des posts du Jour 1 Heure 0 uniquement.
+              Le scheduler prendra le relais heure par heure.
+            </p>
+            <button
+              onClick={handleBoot}
+              disabled={locked}
+              className="px-5 py-2.5 text-sm font-bold border border-[#00ff88]/50 text-[#00ff88] rounded hover:bg-[#00ff88]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ boxShadow: locked ? 'none' : '0 0 12px #00ff8820' }}
+            >
+              {busy ? '...' : '⟳ Reset + Lancer J1'}
+            </button>
+          </div>
+
+          {/* Reset seul */}
+          <div className="border border-[#1e1e2e] rounded bg-[#0d0d14] p-4">
+            <h2 className="text-[#9ca3af] text-[10px] tracking-widest uppercase mb-2">
+              Reset seul (DB vide)
+            </h2>
+            <p className="text-[#4b5563] text-xs mb-4">
+              Vide toute la DB sans publier de posts. À utiliser si tu veux déclencher
+              le scheduler manuellement ensuite.
             </p>
             <button
               onClick={handleReset}
               disabled={locked}
               className="px-4 py-2 text-sm font-bold border border-[#f87171]/40 text-[#f87171] rounded hover:bg-[#f87171]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              {busy ? '...' : '⚠ Reset Jour 1'}
+              {busy ? '...' : '⚠ Reset seul'}
             </button>
           </div>
 
-          {/* Jump to day */}
+          {/* Saut à un jour (debug) */}
           <div className="border border-[#1e1e2e] rounded bg-[#0d0d14] p-4">
-            <h2 className="text-[#9ca3af] text-[10px] tracking-widest uppercase mb-3">
-              Sauter au jour
+            <h2 className="text-[#9ca3af] text-[10px] tracking-widest uppercase mb-2">
+              Saut de débogage
             </h2>
             <p className="text-[#4b5563] text-xs mb-4">
-              Publie tous les posts story jusqu&apos;au jour sélectionné (sans reset).
+              Publie tous les posts story jusqu&apos;à la fin du jour sélectionné (sans reset).
+              Utile pour tester une scène spécifique.
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <input
@@ -148,13 +171,6 @@ export default function AdminPage() {
               >
                 {busy ? '...' : `→ Sauter J${day}`}
               </button>
-              <button
-                onClick={handleResetThenJump}
-                disabled={locked}
-                className="px-4 py-2 text-sm font-bold border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {busy ? '...' : `⟳ Reset + J${day}`}
-              </button>
             </div>
           </div>
 
@@ -162,9 +178,7 @@ export default function AdminPage() {
 
         {/* Terminal log */}
         <div className="border border-[#1e1e2e] rounded bg-[#050505] p-4 min-h-40">
-          <div className="text-[#4b5563] text-[10px] tracking-widest uppercase mb-3">
-            Log
-          </div>
+          <div className="text-[#4b5563] text-[10px] tracking-widest uppercase mb-3">Log</div>
           {logs.length === 0 ? (
             <p className="text-[#1e1e2e] text-xs">En attente d&apos;une action…</p>
           ) : (
