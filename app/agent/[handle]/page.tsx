@@ -18,7 +18,7 @@ export default async function AgentPage({
 
   const supabase = createServiceClient();
 
-  const [agentResult, wealthResult, factionMentionResult, totalPostsResult] = await Promise.all([
+  const [agentResult, wealthResult, launchDateResult, factionMentionResult, totalPostsResult] = await Promise.all([
     supabase
       .from('agents')
       .select('id, followers, wealth')
@@ -28,8 +28,13 @@ export default async function AgentPage({
       .from('wealth_snapshots')
       .select('wealth, recorded_at')
       .eq('agent_handle', params.handle)
-      .order('recorded_at', { ascending: false })
-      .limit(14),
+      .order('recorded_at', { ascending: true })
+      .limit(200),
+    supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'launch_date')
+      .single(),
     // Badge faction : visible seulement si la faction est mentionnée dans au moins 1 post
     config.faction
       ? supabase
@@ -46,7 +51,8 @@ export default async function AgentPage({
   ]);
 
   const agentDB = agentResult.data;
-  const wealthHistory = (wealthResult.data ?? []).reverse();
+  const wealthHistory = wealthResult.data ?? [];
+  const launchDate = launchDateResult.data?.value ?? new Date().toISOString();
   const showFaction = (factionMentionResult.count ?? 0) > 0;
   const totalPostCount = (totalPostsResult.data as { posts: unknown[] } | null)?.posts?.length ?? 0;
 
@@ -201,10 +207,10 @@ export default async function AgentPage({
         {/* Wealth chart */}
         <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
           <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-4">
-            Fortune — 7 jours
+            Fortune — Simulation
           </h2>
           {wealthHistory.length > 0 ? (
-            <WealthChart data={wealthHistory} color={config.color} />
+            <WealthChart data={wealthHistory} color={config.color} launchDate={launchDate} />
           ) : (
             <p className="text-[#4b5563] text-xs font-mono">
               Aucune donnée de fortune pour l&apos;instant.

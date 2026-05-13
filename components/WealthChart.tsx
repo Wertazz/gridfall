@@ -7,15 +7,20 @@ import {
 type Props = {
   data: Array<{ wealth: number; recorded_at: string }>;
   color: string;
+  launchDate: string;
 };
 
-export default function WealthChart({ data, color }: Props) {
-  const chartData = data.map((d) => ({
-    label: new Date(d.recorded_at).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: 'short',
-    }),
-    wealth: Math.round(Number(d.wealth)),
-  }));
+export default function WealthChart({ data, color, launchDate }: Props) {
+  const launch = new Date(launchDate).getTime();
+
+  const chartData = data.map((d) => {
+    const elapsedHours = (new Date(d.recorded_at).getTime() - launch) / 3_600_000;
+    const simDay = Math.max(1, Math.ceil(elapsedHours / 24));
+    return {
+      label: `J${simDay}`,
+      wealth: Math.round(Number(d.wealth)),
+    };
+  });
 
   return (
     <ResponsiveContainer width="100%" height={160}>
