@@ -6,12 +6,6 @@ import { createClient } from '@/lib/supabase';
 import { AGENTS } from '@/lib/agents.config';
 import { formatCount } from '@/lib/utils';
 
-const FACTION_ABBR: Record<string, string> = {
-  NovaCorp:         'NC',
-  'Révolution Eden': 'RE',
-  'Culte de Nyx':   'NYX',
-  ApexCorp:         'AX',
-};
 
 export default function AgentSidebar() {
   const [ecoMap, setEcoMap] = useState<Map<string, number>>(new Map());
@@ -80,7 +74,7 @@ export default function AgentSidebar() {
   });
 
   // Agents dans l'event actif (ordre de apparition)
-  const eventAgents = [...activeHandles]
+  const eventAgents = Array.from(activeHandles)
     .map((handle) => AGENTS.find((a) => a.handle === handle))
     .filter(Boolean) as typeof AGENTS;
 

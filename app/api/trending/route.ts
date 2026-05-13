@@ -52,7 +52,7 @@ export async function GET() {
   }
 
   // Tri par fréquence décroissante, top 8
-  const sorted: TrendingTag[] = [...counts.entries()]
+  const sorted: TrendingTag[] = Array.from(counts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([tag, count]) => ({ tag, count }));
