@@ -3,25 +3,25 @@ import { runSchedulerEngine } from '@/lib/scheduler-engine';
 
 export const dynamic = 'force-dynamic';
 
-function isAuthorized(req: Request): boolean {
-  const url = new URL(req.url);
-  const key = url.searchParams.get('key');
-  const adminKey = process.env.ADMIN_KEY;
-  return !!(adminKey && key === adminKey);
-}
-
-// POST /api/admin/reset?key=ADMIN_KEY&action=reset|jump&day=N
+// POST /api/admin/reset — body: { key, action, day? }
 export async function POST(req: Request) {
-  if (!isAuthorized(req)) {
+  let body: { key?: string; action?: string; day?: number };
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey || body.key !== adminKey) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const url = new URL(req.url);
-  const action = url.searchParams.get('action') ?? 'reset';
+  const action = body.action ?? 'reset';
   const supabase = createServiceClient();
 
   if (action === 'jump') {
-    const day = parseInt(url.searchParams.get('day') ?? '1', 10);
+    const day = body.day ?? 1;
     if (isNaN(day) || day < 1 || day > 30) {
       return Response.json({ error: 'Invalid day' }, { status: 400 });
     }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     return Response.json({ action: 'jump', day, ...result });
   }
 
-  // action === 'reset' — réplique reset-world
+  // action === 'reset'
   const CRON_SECRET = process.env.CRON_SECRET ?? '';
   const resetRes = await fetch(
     new URL('/api/reset-world', req.url).toString(),

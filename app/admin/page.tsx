@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY ?? '';
-
 type LogLine = { ts: string; text: string; ok: boolean };
 
 function ts() {
@@ -11,28 +9,36 @@ function ts() {
 }
 
 export default function AdminPage() {
-  const [logs, setLogs]     = useState<LogLine[]>([]);
-  const [busy, setBusy]     = useState(false);
-  const [day, setDay]       = useState(1);
+  const [adminKey, setAdminKey] = useState('');
+  const [logs, setLogs]         = useState<LogLine[]>([]);
+  const [busy, setBusy]         = useState(false);
+  const [day, setDay]           = useState(1);
 
   function log(text: string, ok = true) {
     setLogs((prev) => [{ ts: ts(), text, ok }, ...prev]);
   }
 
-  async function call(action: string, extraParams?: Record<string, string>) {
-    if (busy) return;
+  async function call(action: string, extraDay?: number) {
+    if (busy || !adminKey) return;
     setBusy(true);
-    const params = new URLSearchParams({ key: ADMIN_KEY, action, ...extraParams });
     try {
-      const res = await fetch(`/api/admin/reset?${params}`, { method: 'POST' });
+      const res = await fetch('/api/admin/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: adminKey, action, day: extraDay }),
+      });
       const data = await res.json();
+      if (res.status === 401) {
+        log('[auth] Clé incorrecte', false);
+        return;
+      }
       if (!res.ok) {
         log(`[${action}] ERREUR : ${data.error ?? res.status}`, false);
       } else if (action === 'reset') {
         log(`[reset] OK — launch_date=${data.new_launch_date ?? '?'}`);
         if (data.errors?.length) data.errors.forEach((e: string) => log(`  ↳ ${e}`, false));
       } else {
-        log(`[jump j${extraParams?.day}] ${data.published} post(s) publiés`);
+        log(`[jump j${extraDay}] ${data.published} post(s) publiés`);
         if (data.errors?.length) data.errors.forEach((e: string) => log(`  ↳ ${e}`, false));
       }
     } catch (err) {
@@ -50,7 +56,7 @@ export default function AdminPage() {
 
   async function handleJump() {
     log(`Saut au Jour ${day}…`);
-    await call('jump', { day: String(day) });
+    await call('jump', day);
   }
 
   async function handleResetThenJump() {
@@ -58,8 +64,10 @@ export default function AdminPage() {
     log('Lancement reset-world…');
     await call('reset');
     log(`Saut au Jour ${day}…`);
-    await call('jump', { day: String(day) });
+    await call('jump', day);
   }
+
+  const locked = !adminKey || busy;
 
   return (
     <div
@@ -81,6 +89,20 @@ export default function AdminPage() {
           </p>
         </div>
 
+        {/* Clé admin */}
+        <div className="border border-[#1e1e2e] rounded bg-[#0d0d14] p-4 mb-6">
+          <label className="text-[#9ca3af] text-[10px] tracking-widest uppercase block mb-2">
+            Clé admin
+          </label>
+          <input
+            type="password"
+            value={adminKey}
+            onChange={(e) => setAdminKey(e.target.value)}
+            placeholder="••••••••••••••••"
+            className="w-full bg-[#050505] border border-[#1e1e2e] rounded px-3 py-2 text-sm text-[#e8e6f0] outline-none focus:border-[#c084fc]/40 transition-colors"
+          />
+        </div>
+
         {/* Actions */}
         <div className="space-y-4 mb-8">
 
@@ -91,12 +113,12 @@ export default function AdminPage() {
             </h2>
             <p className="text-[#4b5563] text-xs mb-4">
               Supprime posts, events, price_history, wealth_snapshots, portfolios, story_log.
-              Remet les agents à wealth=1000, followers aléatoires, lance_date=now.
+              Remet les agents à wealth=1000, followers aléatoires, launch_date=now.
             </p>
             <button
               onClick={handleReset}
-              disabled={busy}
-              className="px-4 py-2 text-sm font-bold border border-[#f87171]/40 text-[#f87171] rounded hover:bg-[#f87171]/10 transition-colors disabled:opacity-40"
+              disabled={locked}
+              className="px-4 py-2 text-sm font-bold border border-[#f87171]/40 text-[#f87171] rounded hover:bg-[#f87171]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {busy ? '...' : '⚠ Reset Jour 1'}
             </button>
@@ -110,7 +132,7 @@ export default function AdminPage() {
             <p className="text-[#4b5563] text-xs mb-4">
               Publie tous les posts story jusqu&apos;au jour sélectionné (sans reset).
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <input
                 type="number"
                 min={1}
@@ -121,15 +143,15 @@ export default function AdminPage() {
               />
               <button
                 onClick={handleJump}
-                disabled={busy}
-                className="px-4 py-2 text-sm font-bold border border-[#c084fc]/40 text-[#c084fc] rounded hover:bg-[#c084fc]/10 transition-colors disabled:opacity-40"
+                disabled={locked}
+                className="px-4 py-2 text-sm font-bold border border-[#c084fc]/40 text-[#c084fc] rounded hover:bg-[#c084fc]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {busy ? '...' : `→ Sauter J${day}`}
               </button>
               <button
                 onClick={handleResetThenJump}
-                disabled={busy}
-                className="px-4 py-2 text-sm font-bold border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/10 transition-colors disabled:opacity-40"
+                disabled={locked}
+                className="px-4 py-2 text-sm font-bold border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {busy ? '...' : `⟳ Reset + J${day}`}
               </button>
