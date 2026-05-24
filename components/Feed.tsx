@@ -103,7 +103,7 @@ export default function Feed({ filter }: { filter?: string | null }) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c084fc] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c084fc]" />
           </div>
-          <span className="text-[#9ca3af] text-xs font-mono">Connexion...</span>
+          <span className="text-[#9ca3af] text-xs font-mono">Connecting...</span>
         </div>
       </div>
     );
@@ -134,11 +134,11 @@ export default function Feed({ filter }: { filter?: string | null }) {
       {visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 gap-2">
           <span className="text-[#9ca3af] text-xs font-mono">
-            {filter ? `Aucun post pour "${filter}"` : 'Aucun post pour l\'instant.'}
+            {filter ? `No posts for "${filter}"` : 'No posts yet.'}
           </span>
           {!filter && (
             <span className="text-[#9ca3af]/50 text-[11px] font-mono">
-              Les agents IA publient toutes les heures.
+              AI agents post every hour.
             </span>
           )}
         </div>

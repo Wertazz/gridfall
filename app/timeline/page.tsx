@@ -23,7 +23,7 @@ type TokenRow = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString('en-US', {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
@@ -77,7 +77,7 @@ export default async function TimelinePage() {
             GRIDFALL
           </Link>
           <span className="text-[#1e1e2e]">|</span>
-          <span className="text-[#9ca3af] text-[11px] font-mono">Timeline — Arc Narratif</span>
+          <span className="text-[#9ca3af] text-[11px] font-mono">Timeline — Narrative Arc</span>
         </div>
         <Link href="/" className="text-[#9ca3af] text-[11px] font-mono hover:text-[#e8e6f0] transition-colors">
           ← Live Feed
@@ -89,10 +89,10 @@ export default async function TimelinePage() {
         {/* Titre */}
         <div className="mb-8">
           <h1 className="text-xl font-mono font-bold text-[#e8e6f0] tracking-wider mb-1">
-            ARC NARRATIF
+            NARRATIVE ARC
           </h1>
           <p className="text-[#4b5563] text-xs font-mono">
-            {events.length} événements · histoire de GRIDFALL
+            {events.length} event{events.length !== 1 ? 's' : ''} · GRIDFALL story
           </p>
         </div>
 
@@ -104,8 +104,8 @@ export default async function TimelinePage() {
           <div className="space-y-0">
             {events.length === 0 ? (
               <div className="pl-10 py-8">
-                <p className="text-[#4b5563] text-sm font-mono">Simulation démarrée. Jour 1 en cours.</p>
-                <p className="text-[#2a2a3a] text-[11px] font-mono mt-1">Les événements apparaîtront ici au fil de l&apos;histoire.</p>
+                <p className="text-[#4b5563] text-sm font-mono">Simulation started. Day 1 in progress.</p>
+                <p className="text-[#2a2a3a] text-[11px] font-mono mt-1">Events will appear here as the story unfolds.</p>
               </div>
             ) : (
               events.map((event, idx) => {
@@ -151,7 +151,7 @@ export default async function TimelinePage() {
                         {event.is_active && (
                           <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#f87171]/10 border border-[#f87171]/30">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#f87171] animate-pulse inline-block" />
-                            <span className="text-[#f87171] text-[10px] font-mono font-bold">EN COURS</span>
+                            <span className="text-[#f87171] text-[10px] font-mono font-bold">ONGOING</span>
                           </span>
                         )}
                       </div>
@@ -216,8 +216,8 @@ export default async function TimelinePage() {
                       {totalVotes > 0 ? (
                         <div className="mt-2">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-mono text-[#4b5563]">VOTE HUMAIN</span>
-                            <span className="text-[10px] font-mono text-[#4b5563]">· {totalVotes} voix</span>
+                            <span className="text-[10px] font-mono text-[#4b5563]">HUMAN VOTE</span>
+                            <span className="text-[10px] font-mono text-[#4b5563]">· {totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
                             {voteWinner && voteWinner !== 'tie' && (
                               <span
                                 className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded"
@@ -226,7 +226,7 @@ export default async function TimelinePage() {
                                   backgroundColor: voteWinner === 'survive' ? '#34d39915' : '#f8717115',
                                 }}
                               >
-                                {voteWinner === 'survive' ? '↑ SURVIE' : '↓ EFFONDREMENT'}
+                                {voteWinner === 'survive' ? '↑ SURVIVED' : '↓ COLLAPSED'}
                               </span>
                             )}
                           </div>
@@ -237,13 +237,13 @@ export default async function TimelinePage() {
                             />
                           </div>
                           <div className="flex gap-4 mt-1">
-                            <span className="text-[10px] font-mono text-[#34d399]">{survivePct}% survie</span>
-                            <span className="text-[10px] font-mono text-[#f87171]">{collapsePct}% effondrement</span>
+                            <span className="text-[10px] font-mono text-[#34d399]">{survivePct}% survive</span>
+                            <span className="text-[10px] font-mono text-[#f87171]">{collapsePct}% collapse</span>
                           </div>
                         </div>
                       ) : (
                         <div className="mt-2">
-                          <span className="text-[10px] font-mono text-[#4b5563]">Aucun vote enregistré</span>
+                          <span className="text-[10px] font-mono text-[#4b5563]">No votes recorded</span>
                         </div>
                       )}
                     </div>

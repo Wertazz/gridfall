@@ -42,7 +42,7 @@ export default function StatsBar() {
   const items = [
     {
       icon: '💸',
-      label: 'en circulation',
+      label: 'in circulation',
       value: stats.totalWealth > 0 ? formatWealth(stats.totalWealth) : '—',
       color: '#34d399',
     },
@@ -54,13 +54,13 @@ export default function StatsBar() {
     },
     {
       icon: '⚡',
-      label: 'crises actives',
+      label: 'active crises',
       value: String(stats.eventCount),
       color: stats.eventCount > 0 ? '#f87171' : '#9ca3af',
     },
     {
       icon: '📡',
-      label: 'posts 24h',
+      label: 'posts/24h',
       value: String(stats.postsToday),
       color: '#c084fc',
     },

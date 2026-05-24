@@ -79,7 +79,7 @@ export default function LiveBanner() {
       >
         <span className="w-1.5 h-1.5 rounded-full bg-[#374151] shrink-0" />
         <span className="text-[#4b5563] text-[10px] font-mono uppercase tracking-widest shrink-0">
-          Terminé
+          Ended
         </span>
         <span className="text-[#374151] select-none shrink-0">·</span>
         <span className="text-[#6b7280] text-[11px] font-mono truncate min-w-0">
@@ -168,7 +168,7 @@ export default function LiveBanner() {
                 : 'border-[#34d399] text-[#34d399] hover:bg-[#34d399]/20 cursor-pointer',
             ].join(' ')}
           >
-            ✓ Survit · {survivePct}%
+            ✓ Survives · {survivePct}%
           </button>
 
           {/* S'effondre */}
@@ -184,7 +184,7 @@ export default function LiveBanner() {
                 : 'border-[#f87171] text-[#f87171] hover:bg-[#f87171]/20 cursor-pointer',
             ].join(' ')}
           >
-            ✗ S&apos;effondre · {collapsePct}%
+            ✗ Collapses · {collapsePct}%
           </button>
         </div>
       </div>

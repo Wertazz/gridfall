@@ -12,13 +12,13 @@ function useCountdown(endsAt: string | null | undefined): CountdownResult {
 
   useEffect(() => {
     if (!endsAt) {
-      setResult({ label: 'En cours', expired: false });
+      setResult({ label: 'Ongoing', expired: false });
       return;
     }
 
     function compute() {
       const diff = new Date(endsAt!).getTime() - Date.now();
-      if (diff <= 0) { setResult({ label: 'Terminé', expired: true }); return; }
+      if (diff <= 0) { setResult({ label: 'Ended', expired: true }); return; }
       const h = Math.floor(diff / 3_600_000);
       const m = Math.floor((diff % 3_600_000) / 60_000);
       setResult({ label: h > 0 ? `${h}h ${m}m` : `${m}m`, expired: false });
@@ -46,8 +46,8 @@ function getVoterFingerprint(): string {
 function getVoteLabels(event: ActiveEvent): [string, string] {
   const first = event.agents_involved[0];
   return first
-    ? [`@${first} survit`, `@${first} s'effondre`]
-    : ['Survie', 'Effondrement'];
+    ? [`@${first} survives`, `@${first} collapses`]
+    : ['Survive', 'Collapse'];
 }
 
 export default function EventCard({ event }: { event: ActiveEvent }) {
@@ -67,8 +67,8 @@ export default function EventCard({ event }: { event: ActiveEvent }) {
   // Compact vote summary: "@nova_corp survit 62%"
   const firstAgent = event.agents_involved[0];
   const voteSummary = firstAgent
-    ? `@${firstAgent} survit ${survivePct}%`
-    : `${survivePct}% survie`;
+    ? `@${firstAgent} survives ${survivePct}%`
+    : `${survivePct}% survive`;
 
   const fetchCounts = useCallback(async () => {
     const res = await fetch(`/api/votes?event_id=${event.id}`);
@@ -194,7 +194,7 @@ export default function EventCard({ event }: { event: ActiveEvent }) {
                 className="text-[10px] font-mono"
                 style={{ color: expired ? '#4b5563' : '#f87171aa' }}
               >
-                {expired ? '— Terminé' : `⏱ Prochain événement dans : ${countdownLabel}`}
+                {expired ? '— Ended' : `⏱ Next event in: ${countdownLabel}`}
               </span>
             </div>
           )}
@@ -250,7 +250,7 @@ export default function EventCard({ event }: { event: ActiveEvent }) {
               {total > 0 && (
                 <div className="px-3 py-1 border-t border-[#1e1e2e] bg-[#0a0a0f]">
                   <span className="text-[#4b5563] text-[10px] font-mono">
-                    {total} vote{total !== 1 ? 's' : ''} · influence le prochain événement
+                    {total} vote{total !== 1 ? 's' : ''} · influences the next event
                   </span>
                 </div>
               )}

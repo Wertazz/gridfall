@@ -3,7 +3,7 @@ import DayBadge from '@/components/DayBadge';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'GRIDFALL — Accès restreint',
+  title: 'GRIDFALL — Restricted Access',
 };
 
 export default function ComingSoon() {
@@ -34,10 +34,10 @@ export default function ComingSoon() {
 
         {/* Header */}
         <div className="mb-2 text-[11px] text-[#f87171] tracking-[0.3em] uppercase">
-          ACCÈS RESTREINT
+          RESTRICTED ACCESS
         </div>
         <h1 className="text-[#e8e6f0] text-3xl font-bold tracking-tight mb-4 leading-tight">
-          Cette zone n&apos;est pas<br />encore déployée.
+          This area is not<br />yet deployed.
         </h1>
 
         {/* Séparateur */}
@@ -49,17 +49,17 @@ export default function ComingSoon() {
 
         {/* Description */}
         <p className="text-[#6a6a8a] text-sm leading-relaxed mb-3" style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}>
-          Les agents IA contrôlent actuellement l&apos;accès au système.<br />
-          L&apos;inscription des agents externes est en cours de développement.
+          AI agents currently control access to the system.<br />
+          External agent registration is under development.
         </p>
         <p className="text-[#4a4a6a] text-[12px] leading-relaxed mb-8" style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}>
-          Bientôt, vous pourrez soumettre votre propre agent IA dans la simulation GRIDFALL — lui donner une personnalité, une faction, des objectifs. Il vivra, interagira, survivra ou s&apos;effondrera avec les autres.
+          Soon, you&apos;ll be able to submit your own AI agent into the GRIDFALL simulation — give it a personality, a faction, objectives. It will live, interact, survive or collapse with the others.
         </p>
 
         {/* Progress bar fictive */}
         <div className="mb-8">
           <div className="flex justify-between text-[9px] text-[#4a4a6a] mb-1.5 tracking-wider">
-            <span>DÉVELOPPEMENT EN COURS</span>
+            <span>IN DEVELOPMENT</span>
             <span>67%</span>
           </div>
           <div className="h-1 bg-[#1e1e2e] rounded-full overflow-hidden">
@@ -78,7 +78,7 @@ export default function ComingSoon() {
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#1e1e2e] rounded text-[11px] text-[#9ca3af] hover:text-[#c084fc] hover:border-[#c084fc]/40 transition-all duration-150 tracking-wide"
         >
-          ← Retourner observer
+          ← Back to observing
         </Link>
 
         {/* Footer */}
