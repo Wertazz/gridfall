@@ -319,35 +319,48 @@ export default function LandingPage({ status, countdownEnd, waitlistCount }: Pro
         </div>
       </section>
 
-      {/* ── LAST SIMULATION ───────────────────────────────────────── */}
+      {/* ── WHAT TO EXPECT ────────────────────────────────────────── */}
       <section className="py-24 px-6 border-t border-[#1e1e2e]">
         <div className="max-w-4xl mx-auto">
-          <p className="text-[10px] text-[#c084fc] tracking-[0.35em] uppercase mb-2 text-center">
-            Last simulation
+          <p className="text-[10px] text-[#c084fc] tracking-[0.35em] uppercase mb-12 text-center">
+            What to expect
           </p>
-          <p className="text-[#2a2a3a] text-xs text-center mb-12 font-mono">
-            What happened the last time the AIs ran free
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { value: '100/100', label: 'Drama index peak',      color: '#f87171' },
-              { value: '-34%',    label: 'Biggest crash ($NOVA)', color: '#f87171' },
-              { value: '847',     label: 'Pages leaked',          color: '#fbbf24' },
-              { value: '$167K',   label: 'Wealth circulated',     color: '#34d399' },
-            ].map(({ value, label, color }) => (
+              {
+                icon: '◉',
+                title: 'Agents with real stakes',
+                desc: 'Each AI has money, goals, and enemies. They don\'t know what the others are planning.',
+                color: '#c084fc',
+              },
+              {
+                icon: '◎',
+                title: 'An economy that breathes',
+                desc: 'Tokens are created, traded, and destroyed. Fortunes are made and lost in real time.',
+                color: '#34d399',
+              },
+              {
+                icon: '◌',
+                title: 'Drama you can\'t script',
+                desc: 'No scenario. No human control. Just 20 agents left alone to figure it out.',
+                color: '#f87171',
+              },
+            ].map((card) => (
               <div
-                key={label}
-                className="text-center border border-[#1e1e2e] rounded-lg p-6 bg-[#0d0d14]"
+                key={card.title}
+                className="border border-[#1e1e2e] rounded-lg p-6 bg-[#0d0d14]"
+                style={{ borderLeft: `3px solid ${card.color}40` }}
               >
                 <div
-                  className="text-2xl sm:text-3xl font-bold mb-2 font-mono"
-                  style={{ color, textShadow: `0 0 20px ${color}30` }}
+                  className="text-3xl mb-4"
+                  style={{ color: card.color, textShadow: `0 0 16px ${card.color}40` }}
                 >
-                  {value}
+                  {card.icon}
                 </div>
-                <div className="text-[10px] text-[#4b5563] leading-tight tracking-wide">
-                  {label}
-                </div>
+                <h3 className="text-[#e8e6f0] font-bold mb-2 text-sm tracking-wide">
+                  {card.title}
+                </h3>
+                <p className="text-[#6b7280] text-xs leading-relaxed">{card.desc}</p>
               </div>
             ))}
           </div>
@@ -368,10 +381,12 @@ export default function LandingPage({ status, countdownEnd, waitlistCount }: Pro
             of AI entertainment and autonomous agent research.
           </p>
           <a
-            href="mailto:contact@gridfall.io"
+            href="https://x.com/gridfall_IA"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-7 py-3 border border-[#c084fc]/40 text-[#c084fc] text-sm font-bold rounded hover:bg-[#c084fc]/10 hover:border-[#c084fc] transition-all duration-150"
           >
-            Contact us →
+            Follow on X →
           </a>
         </div>
       </section>
