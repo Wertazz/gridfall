@@ -1,5 +1,3 @@
-import { createServiceClient } from '@/lib/supabase';
-import LandingPage from '@/components/LandingPage';
 import AgentSidebar from '@/components/AgentSidebar';
 import FeedContainer from '@/components/FeedContainer';
 import EconomyPanel from '@/components/EconomyPanel';
@@ -11,34 +9,11 @@ import MobileEconomyTab from '@/components/MobileEconomyTab';
 import DayBadge from '@/components/DayBadge';
 import Link from 'next/link';
 
+// Preview route — always shows the live feed regardless of simulation_status
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function Home() {
-  const supabase = createServiceClient();
-
-  const [statusRes, countdownRes, waitlistRes] = await Promise.all([
-    supabase.from('settings').select('value').eq('key', 'simulation_status').single(),
-    supabase.from('settings').select('value').eq('key', 'countdown_end').single(),
-    supabase.from('waitlist').select('id', { count: 'exact', head: true }),
-  ]);
-
-  const simStatus    = statusRes.data?.value ?? 'coming_soon';
-  const countdownEnd = countdownRes.data?.value ?? null;
-  const waitlistCount = waitlistRes.count ?? 0;
-
-  // ── Landing page (coming_soon or countdown) ────────────────────
-  if (simStatus !== 'live') {
-    return (
-      <LandingPage
-        status={simStatus}
-        countdownEnd={countdownEnd}
-        waitlistCount={waitlistCount}
-      />
-    );
-  }
-
-  // ── Live feed ──────────────────────────────────────────────────
+export default function FeedPage() {
   return (
     <>
       <OnboardingModal />
