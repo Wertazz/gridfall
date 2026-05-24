@@ -87,7 +87,7 @@ export default function NowWidget() {
           className="text-[9px] font-bold tracking-[0.2em] text-[#f87171] uppercase"
           style={{ fontFamily: 'var(--font-space-mono), monospace' }}
         >
-          En ce moment
+          Right now
         </span>
       </div>
 

@@ -20,11 +20,11 @@ type TokenRow = {
 };
 
 function getDramaLabel(index: number): string {
-  if (index >= 81) return 'CRITIQUE';
-  if (index >= 51) return 'INSTABLE';
-  if (index >= 21) return 'TENSIONS';
+  if (index >= 81) return 'CRITICAL';
+  if (index >= 51) return 'UNSTABLE';
+  if (index >= 21) return 'TENSE';
   if (index >= 1)  return 'STABLE';
-  return 'Initialisation...';
+  return 'Initializing...';
 }
 
 export default function EconomyPanel() {
@@ -138,7 +138,7 @@ export default function EconomyPanel() {
           />
         </div>
         <p className="text-[#9ca3af] text-[10px] font-mono mt-1.5">
-          Niveau de tension : {getDramaLabel(dramaIndex)}
+          Tension level: {getDramaLabel(dramaIndex)}
         </p>
       </div>
 
@@ -158,7 +158,7 @@ export default function EconomyPanel() {
         ) : highlights.length === 0 ? (
           <div className="px-3 py-3">
             <span className="text-[#4b5563] text-[10px] font-mono">
-              Aucun événement pour l&apos;instant.
+              No events yet.
             </span>
           </div>
         ) : (
@@ -215,10 +215,10 @@ export default function EconomyPanel() {
         ) : tokens.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-24 gap-1 px-3">
             <span className="text-[#4b5563] text-[10px] font-mono text-center">
-              Aucun token actif pour l&apos;instant.
+              No active tokens yet.
             </span>
             <span className="text-[#2a2a3a] text-[9px] font-mono text-center">
-              Les tokens apparaissent dès qu&apos;un agent en achète.
+              Tokens appear once an agent buys one.
             </span>
           </div>
         ) : (
@@ -260,7 +260,7 @@ export default function EconomyPanel() {
       >
         <span className="text-lg shrink-0">👁</span>
         <p className="text-[#6a6a8a] text-[11px] leading-[1.4]">
-          Tu <span className="text-[#c084fc] font-medium">observes</span> cette société. Les IA continuent sans toi. Reviens demain — il se sera passé des choses.
+          You&apos;re <span className="text-[#c084fc] font-medium">observing</span> this society. AIs keep going without you. Come back tomorrow — things will have happened.
         </p>
       </div>
 
@@ -268,8 +268,8 @@ export default function EconomyPanel() {
       <div className="px-3 py-2 border-t border-[#1e1e2e] bg-[#0d0d14] shrink-0">
         <p className="text-[#4a4a6a] text-[10px] font-mono text-center">
           {loading
-            ? 'Chargement...'
-            : `${tokens.length} tokens actifs`}
+            ? 'Loading...'
+            : `${tokens.length} active token${tokens.length !== 1 ? 's' : ''}`}
         </p>
       </div>
 

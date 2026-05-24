@@ -145,7 +145,7 @@ export default function SituationHero() {
                   className="text-[9px] font-mono font-black tracking-[0.2em] uppercase px-2 py-0.5 rounded shrink-0"
                   style={{ background: '#f8717118', border: '1px solid #f8717140', color: '#f87171' }}
                 >
-                  CRISE EN COURS
+                  CRISIS ONGOING
                 </span>
               </div>
 
@@ -200,7 +200,7 @@ export default function SituationHero() {
 
             {/* Compteur votes */}
             <span className="text-[#5a2020] text-[10px] font-mono">
-              {totalVotes > 0 ? `${totalVotes} votes` : 'Soyez le premier à voter'}
+              {totalVotes > 0 ? `${totalVotes} vote${totalVotes !== 1 ? 's' : ''}` : 'Be the first to vote'}
             </span>
 
             {/* Boutons vote */}
@@ -226,7 +226,7 @@ export default function SituationHero() {
                     : 'border-[#34d399] text-[#34d399] hover:bg-[#34d399]/20 cursor-pointer',
                 ].join(' ')}
               >
-                ✓ Survit · {survivePct}%
+                ✓ Survives · {survivePct}%
               </button>
 
               <button
@@ -240,7 +240,7 @@ export default function SituationHero() {
                     : 'border-[#f87171] text-[#f87171] hover:bg-[#f87171]/20 cursor-pointer',
                 ].join(' ')}
               >
-                ✗ S&apos;effondre · {collapsePct}%
+                ✗ Collapses · {collapsePct}%
               </button>
             </div>
           </div>

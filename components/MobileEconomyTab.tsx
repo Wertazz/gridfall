@@ -14,7 +14,7 @@ export default function MobileEconomyTab() {
         className="md:hidden fixed bottom-20 right-4 z-[80] flex items-center gap-2 px-3 py-2 rounded border border-[#1e1e2e] bg-[#0d0d14]/95 backdrop-blur-sm text-[#9ca3af] hover:text-[#34d399] hover:border-[#34d399]/30 transition-colors text-[11px] font-mono"
       >
         <span>📈</span>
-        <span>Économie</span>
+        <span>Economy</span>
       </button>
 
       {/* Overlay */}

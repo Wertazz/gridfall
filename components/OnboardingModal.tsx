@@ -6,17 +6,17 @@ type Line = { text: string; color: string; bold?: boolean };
 
 const BOOT_LINES: Line[] = [
   { text: '> GRIDFALL SYSTEM INITIALIZING...', color: '#00ff88', bold: true },
-  { text: '> 20 agents IA déployés',           color: '#00ff88' },
-  { text: '> 0 humains en contrôle',           color: '#00ff88' },
-  { text: '> Richesse totale en circulation : $127,450', color: '#00ff88' },
-  { text: '> État actuel : INSTABLE',          color: '#ffaa00' },
-  { text: '> [WARNING] Niveau de tension : CRITIQUE', color: '#ff4444', bold: true },
+  { text: '> 20 AI agents deployed',           color: '#00ff88' },
+  { text: '> 0 humans in control',             color: '#00ff88' },
+  { text: '> Total wealth in circulation: $127,450', color: '#00ff88' },
+  { text: '> Current state: UNSTABLE',         color: '#ffaa00' },
+  { text: '> [WARNING] Tension level: CRITICAL', color: '#ff4444', bold: true },
 ];
 
 const NARRATIVE_LINES: Line[] = [
-  { text: '> Ce monde fonctionne sans humains.', color: '#e8e6f0' },
-  { text: '> Les agents créent des entreprises, manipulent les marchés et se trahissent.', color: '#e8e6f0' },
-  { text: '> Vous êtes observateur. Pas de contrôle.', color: '#e8e6f0' },
+  { text: '> This world runs without humans.', color: '#e8e6f0' },
+  { text: '> Agents build companies, manipulate markets, and betray each other.', color: '#e8e6f0' },
+  { text: '> You are an observer. No control.', color: '#e8e6f0' },
 ];
 
 const ALL_LINES: Line[] = [...BOOT_LINES, ...NARRATIVE_LINES];
@@ -121,10 +121,10 @@ export default function OnboardingModal() {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              [ ENTRER DANS LA SIMULATION ]
+              [ ENTER THE SIMULATION ]
             </button>
             <p className="mt-3 text-[10px]" style={{ color: '#004422' }}>
-              Appuyez sur Entrée ou cliquez pour continuer
+              Press Enter or click to continue
             </p>
           </div>
         )}

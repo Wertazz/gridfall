@@ -86,7 +86,7 @@ export default function AgentSidebar() {
           Agents
         </span>
         <span className="text-[#9ca3af] text-[10px] font-mono ml-2">
-          {AGENTS.length} actifs
+          {AGENTS.length} active
         </span>
       </div>
 
@@ -100,7 +100,7 @@ export default function AgentSidebar() {
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#f87171]" />
               </span>
               <span className="text-[#f87171] text-[9px] font-mono font-bold tracking-widest uppercase">
-                Dans l&apos;événement
+                In the event
               </span>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function AgentSidebar() {
       {factionPostCounts.size > 0 && (
       <div className="shrink-0 border-t border-[#1e1e2e]">
         <div className="px-3 py-1.5">
-          <span className="text-[#4a4a6a] text-[9px] font-mono tracking-[0.2em] uppercase">Factions actives</span>
+          <span className="text-[#4a4a6a] text-[9px] font-mono tracking-[0.2em] uppercase">Active Factions</span>
         </div>
         {([
           { name: 'NovaCorp',        color: '#c084fc' },

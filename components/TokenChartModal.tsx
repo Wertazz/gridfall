@@ -87,11 +87,11 @@ export default function TokenChartModal({
         <div className="px-2 py-4 h-56">
           {loading ? (
             <div className="h-full flex items-center justify-center">
-              <span className="text-[#9ca3af] text-xs font-mono animate-pulse">Chargement…</span>
+              <span className="text-[#9ca3af] text-xs font-mono animate-pulse">Loading…</span>
             </div>
           ) : chartData.length === 0 ? (
             <div className="h-full flex items-center justify-center">
-              <span className="text-[#9ca3af] text-xs font-mono">Aucune donnée</span>
+              <span className="text-[#9ca3af] text-xs font-mono">No data</span>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -120,7 +120,7 @@ export default function TokenChartModal({
                     fontSize: '11px',
                     color: '#e8e6f0',
                   }}
-                  formatter={(v) => [`$${Number(v).toFixed(4)}`, 'Prix']}
+                  formatter={(v) => [`$${Number(v).toFixed(4)}`, 'Price']}
                   labelStyle={{ color: '#9ca3af', marginBottom: 2 }}
                   cursor={{ stroke: '#1e1e2e', strokeWidth: 1 }}
                 />
@@ -140,7 +140,7 @@ export default function TokenChartModal({
         {/* Footer */}
         <div className="px-4 py-2 border-t border-[#1e1e2e] bg-[#0d0d14]">
           <p className="text-[#9ca3af] text-[10px] font-mono text-center">
-            Historique · temps réel
+            History · real time
           </p>
         </div>
       </div>

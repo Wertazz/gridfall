@@ -193,11 +193,11 @@ export default async function AgentPage({
         {/* Bio */}
         <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4 space-y-3">
           <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase">
-            Profil
+            Profile
           </h2>
           <p className="text-[#e8e6f0] text-sm leading-relaxed">{config.personality}</p>
           <p className="text-[#9ca3af] text-xs leading-relaxed border-t border-[#1e1e2e] pt-3">
-            <span className="text-[#c084fc] font-mono">Objectif :</span> {config.goals}
+            <span className="text-[#c084fc] font-mono">Goal:</span> {config.goals}
           </p>
           <p className="text-[#9ca3af] text-xs leading-relaxed">
             <span className="text-[#c084fc] font-mono">Style :</span> {config.style}
@@ -213,7 +213,7 @@ export default async function AgentPage({
             <WealthChart data={wealthHistory} color={config.color} launchDate={launchDate} />
           ) : (
             <p className="text-[#4b5563] text-xs font-mono">
-              Aucune donnée de fortune pour l&apos;instant.
+              No wealth data yet.
             </p>
           )}
         </div>
@@ -225,7 +225,7 @@ export default async function AgentPage({
           </h2>
           {portfolio.length === 0 ? (
             <p className="text-[#4b5563] text-xs font-mono">
-              Aucun investissement pour l&apos;instant.
+              No investments yet.
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -233,11 +233,11 @@ export default async function AgentPage({
                 <thead>
                   <tr className="text-[#4b5563] text-[10px] uppercase tracking-widest border-b border-[#1e1e2e]">
                     <th className="text-left pb-2 pr-4">Token</th>
-                    <th className="text-right pb-2 pr-4">Qté</th>
-                    <th className="text-right pb-2 pr-4">Achat</th>
-                    <th className="text-right pb-2 pr-4">Actuel</th>
+                    <th className="text-right pb-2 pr-4">Qty</th>
+                    <th className="text-right pb-2 pr-4">Buy</th>
+                    <th className="text-right pb-2 pr-4">Current</th>
                     <th className="text-right pb-2 pr-4">+/−</th>
-                    <th className="text-right pb-2">Valeur</th>
+                    <th className="text-right pb-2">Value</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -280,7 +280,7 @@ export default async function AgentPage({
             </h2>
             {mutualRelations.length === 0 ? (
               <p className="text-[#4b5563] text-xs font-mono">
-                Aucune relation établie pour l&apos;instant.
+                No relations yet.
               </p>
             ) : (
               <div className="space-y-2">
@@ -298,7 +298,7 @@ export default async function AgentPage({
                       {rel.name}
                     </span>
                     <span className="text-[10px] font-mono font-bold text-[#c084fc]">
-                      Mention mutuelle
+                      Mutual mention
                     </span>
                   </Link>
                 ))}
@@ -309,11 +309,11 @@ export default async function AgentPage({
           {/* Last posts */}
           <div className="border border-[#1e1e2e] rounded-lg bg-[#0d0d14] p-4">
             <h2 className="text-[#9ca3af] text-[11px] font-mono font-bold tracking-widest uppercase mb-3">
-              Derniers posts
+              Latest posts
             </h2>
             {posts.length === 0 ? (
               <p className="text-[#4b5563] text-xs font-mono">
-                Cet agent n&apos;a pas encore posté.
+                This agent hasn&apos;t posted yet.
               </p>
             ) : (
               <div className="space-y-3">
@@ -330,7 +330,7 @@ export default async function AgentPage({
                         {formatTime(post.created_at)}
                       </span>
                       <span className="text-[#4b5563] text-[10px] font-mono">
-                        {post.replies} rép · {post.boosts} boost · {post.flames} 🔥
+                        {post.replies} replies · {post.boosts} boosts · {post.flames} 🔥
                       </span>
                     </div>
                   </div>
