@@ -21,31 +21,43 @@ export default function AdminPage() {
   async function post(action: string, extraDay?: number) {
     if (busy || !adminKey) return;
     setBusy(true);
+    const payload = { key: adminKey, action, day: extraDay };
+    console.log('[admin] → POST /api/admin/reset', { action, day: extraDay });
     try {
       const res = await fetch('/api/admin/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: adminKey, action, day: extraDay }),
+        body: JSON.stringify(payload),
       });
+      console.log('[admin] ← status', res.status);
       const data = await res.json();
+      console.log('[admin] ← body', data);
+
       if (res.status === 401) { log('[auth] Clé incorrecte', false); return; }
       if (!res.ok) { log(`[${action}] ERREUR : ${data.error ?? res.status}`, false); return; }
 
       if (action === 'reset') {
         log(`[reset] OK — launch_date=${data.new_launch_date ?? '?'}`);
+        console.log('[admin] reset steps:', data.steps);
         data.errors?.forEach((e: string) => log(`  ↳ ${e}`, false));
 
       } else if (action === 'reset_and_boot') {
         log(`[reset+boot] OK — launch_date=${data.new_launch_date ?? '?'}`);
         log(`  ↳ boot : ${data.boot?.published ?? 0} post(s) J1H0 publiés`);
+        console.log('[admin] reset steps:', data.reset?.steps);
+        console.log('[admin] boot posts:', data.boot?.posts);
+        console.log('[admin] boot errors:', data.boot?.errors);
         data.reset?.errors?.forEach((e: string) => log(`  ↳ reset: ${e}`, false));
         data.boot?.errors?.forEach((e: string) => log(`  ↳ boot: ${e}`, false));
 
       } else {
         log(`[jump J${extraDay}] ${data.published} post(s) publiés`);
+        console.log('[admin] jump posts:', data.posts);
+        console.log('[admin] jump errors:', data.errors);
         data.errors?.forEach((e: string) => log(`  ↳ ${e}`, false));
       }
     } catch (err) {
+      console.error('[admin] exception:', err);
       log(`[${action}] Exception : ${String(err)}`, false);
     } finally {
       setBusy(false);
