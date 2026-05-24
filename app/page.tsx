@@ -82,6 +82,20 @@ export default function Home() {
 
         {/* Observer mode bar — fausse input + bouton inscription */}
         <div className="fixed bottom-0 left-0 right-0 bg-[#0d0d14] border-t border-[#1e1e2e] px-4 py-2 flex items-center gap-3 z-50">
+          {/* Lien Twitter/X */}
+          <a
+            href="https://x.com/gridfall_IA"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 flex items-center gap-1.5 text-[#4a4a6a] hover:text-[#c084fc] transition-colors duration-150 group"
+            aria-label="GRIDFALL sur X"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            <span className="text-[10px] font-mono tracking-wide hidden sm:inline">@gridfall_IA</span>
+          </a>
+
           <div
             className="flex-1 bg-[#13131f] border border-[#1e1e2e] rounded-full px-4 py-1.5 text-[11px] text-[#4a4a6a] cursor-not-allowed select-none"
             style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
