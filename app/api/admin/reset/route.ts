@@ -19,11 +19,13 @@ export async function POST(req: Request) {
   }
 
   const action = body.action ?? 'reset';
+  console.log(`[admin/reset] action=${action} day=${body.day ?? '-'}`);
   const supabase = createServiceClient();
 
-  // ── Reset complet ────────────────────────────────────────────────────────
+  // ── Reset complet (DB vide, launch_date = now) ───────────────────────────
   if (action === 'reset') {
     const result = await runReset(supabase);
+    console.log('[admin/reset] reset done:', result.steps, 'errors:', result.errors);
     return Response.json({
       action: 'reset',
       success: result.success,
@@ -33,43 +35,58 @@ export async function POST(req: Request) {
     }, { status: result.success ? 200 : 207 });
   }
 
-  // ── Reset + publication des posts J1 H0 uniquement ──────────────────────
+  // ── Reset + boot J1H0+H1 ────────────────────────────────────────────────
+  // Formule identique à jump-to-day :
+  //   launchDate = Date.now() - elapsed_cible
+  //   elapsed = 2h → publie tous les posts simHour ≤ 2 (day:1 hour:0 et hour:1)
   if (action === 'reset_and_boot') {
     const resetResult = await runReset(supabase);
-    const launchDate = new Date(resetResult.new_launch_date);
-    // Cible = launch_date + 59 min → publie day:1 hour:0 (toutes minutes) uniquement
-    const bootTarget = new Date(launchDate.getTime() + 59 * 60 * 1000);
-    const schedResult = await runSchedulerEngine(supabase, bootTarget);
+    console.log('[admin/reset] reset done, steps:', resetResult.steps, 'errors:', resetResult.errors);
+
+    // Recule launch_date de 2h : elapsed = 2h, posts hour:0 et hour:1 dus
+    const bootLaunchDate = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    console.log('[admin/reset] boot launchDate (now-2h):', bootLaunchDate.toISOString());
+
+    // Mise à jour de launch_date en DB pour que le scheduler continue correctement
+    await supabase.from('settings').upsert({
+      key: 'launch_date',
+      value: bootLaunchDate.toISOString(),
+    });
+
+    const schedResult = await runSchedulerEngine(supabase, bootLaunchDate);
+    console.log('[admin/reset] boot done — published:', schedResult.published, 'posts:', schedResult.posts, 'errors:', schedResult.errors);
+
     return Response.json({
       action: 'reset_and_boot',
       success: resetResult.success,
       reset: { steps: resetResult.steps, errors: resetResult.errors },
       boot: { published: schedResult.published, posts: schedResult.posts, errors: schedResult.errors },
-      new_launch_date: resetResult.new_launch_date,
+      new_launch_date: bootLaunchDate.toISOString(),
     }, { status: resetResult.success ? 200 : 207 });
   }
 
   // ── Saut à un jour précis (sans reset) ──────────────────────────────────
+  // Formule copiée de /api/jump-to-day :
+  //   launchDate = Date.now() - (day-1)*24h
+  //   → elapsed = (day-1)*24h → tous les posts de J1 à J(day-1) sont dus
   if (action === 'jump') {
     const day = body.day ?? 1;
     if (isNaN(day) || day < 1 || day > 30) {
       return Response.json({ error: 'Invalid day' }, { status: 400 });
     }
 
-    const { data: settings } = await supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'launch_date')
-      .single();
+    const jumpLaunchDate = new Date(Date.now() - (day - 1) * 24 * 60 * 60 * 1000);
+    console.log(`[admin/reset] jump day=${day} launchDate:`, jumpLaunchDate.toISOString());
 
-    if (!settings?.value) {
-      return Response.json({ error: 'No launch_date in settings' }, { status: 400 });
-    }
+    // Met à jour launch_date en DB
+    await supabase.from('settings').upsert({
+      key: 'launch_date',
+      value: jumpLaunchDate.toISOString(),
+    });
 
-    const launchDate = new Date(settings.value);
-    // Cible = fin du jour N (23h59) pour publier tous les posts de J1…JN
-    const targetDate = new Date(launchDate.getTime() + ((day - 1) * 24 + 23) * 60 * 60 * 1000 + 59 * 60 * 1000);
-    const result = await runSchedulerEngine(supabase, targetDate);
+    const result = await runSchedulerEngine(supabase, jumpLaunchDate);
+    console.log('[admin/reset] jump done — published:', result.published, 'errors:', result.errors);
+
     return Response.json({ action: 'jump', day, ...result });
   }
 
