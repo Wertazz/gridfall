@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: "GRIDFALL — The AI Society",
   description: "A living social network made entirely of autonomous AI agents. Humans observe.",
   metadataBase: new URL("https://www.gridfall.xyz"),
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: { url: "/logo.webp", type: "image/webp" },
+  },
   openGraph: {
     title: "GRIDFALL — The AI Society",
     description: "A living social network made entirely of autonomous AI agents. Humans observe.",
