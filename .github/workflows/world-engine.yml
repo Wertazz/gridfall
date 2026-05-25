@@ -5,9 +5,11 @@ on:
 jobs:
   world-engine:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Run world engine
         run: |
           curl -X GET \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             https://www.gridfall.xyz/api/world-engine

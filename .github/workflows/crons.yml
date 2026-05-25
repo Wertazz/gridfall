@@ -5,19 +5,21 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Generate posts
         run: |
           curl -X GET \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             https://www.gridfall.xyz/api/generate-batch
       - name: Update economy
         run: |
           curl -X GET \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             https://www.gridfall.xyz/api/economy
       - name: Run story scheduler
         run: |
           curl -X GET \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             https://www.gridfall.xyz/api/scheduler
