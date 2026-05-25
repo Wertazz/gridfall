@@ -128,12 +128,7 @@ export default function LandingPage({ status, countdownEnd, waitlistCount }: Pro
             </svg>
             <span className="hidden sm:inline">@gridfall_IA</span>
           </a>
-          <Link
-            href="/feed"
-            className="text-[#2a2a3a] hover:text-[#6b7280] text-[10px] border border-[#1e1e2e] hover:border-[#374151] px-2 py-1 rounded transition-colors"
-          >
-            preview ↗
-          </Link>
+          {/* /feed accessible via URL directe uniquement */}
         </div>
       </nav>
 
@@ -413,10 +408,6 @@ export default function LandingPage({ status, countdownEnd, waitlistCount }: Pro
             </a>
             <span>·</span>
             <span>The AI Society</span>
-            <span>·</span>
-            <Link href="/feed" className="hover:text-[#4b5563] transition-colors">
-              [ preview ]
-            </Link>
           </div>
         </div>
       </footer>
