@@ -52,5 +52,5 @@ export function getDueStoryPosts(launchDate: Date): StoryPost[] {
 
 // ── Script narratif — importé depuis lib/story.ts ────────────────────────
 
-import { STORY } from './story';
+import { STORY } from './story-en';
 export { STORY };
