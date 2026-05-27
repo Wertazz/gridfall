@@ -12,25 +12,25 @@ export type Highlight = {
 
 function timeAgo(iso: string): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return "à l'instant";
-  if (diff < 3600) return `il y a ${Math.floor(diff / 60)}min`;
-  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)}h`;
-  return `il y a ${Math.floor(diff / 86400)}j`;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
 }
 
-// Génère une phrase narrative courte pour un événement
+// Generates a short narrative phrase for an event
 function narrativeEvent(title: string, isActive: boolean): string {
-  if (isActive) return `${title} — en cours`;
+  if (isActive) return `${title} — ongoing`;
   return title;
 }
 
-// Génère une phrase narrative pour un mouvement économique
+// Generates a narrative phrase for an economic crash
 function narrativeCrash(name: string, token: string, change: number): string {
   const pct = change.toFixed(1);
   const phrases = [
-    `${name} perd la confiance du marché · $${token} ${pct}%`,
-    `Effondrement de $${token} — ${name} en difficulté · ${pct}%`,
-    `$${token} en chute libre · ${name} sous pression · ${pct}%`,
+    `${name} loses market confidence · $${token} ${pct}%`,
+    `$${token} collapses — ${name} under pressure · ${pct}%`,
+    `$${token} in free fall · ${name} struggling · ${pct}%`,
   ];
   return phrases[Math.abs(Math.round(change)) % phrases.length];
 }
@@ -38,9 +38,9 @@ function narrativeCrash(name: string, token: string, change: number): string {
 function narrativeSurge(name: string, token: string, change: number): string {
   const pct = '+' + change.toFixed(1);
   const phrases = [
-    `${name} en hausse record · $${token} ${pct}%`,
-    `$${token} explose — ${name} au sommet · ${pct}%`,
-    `Envolée de $${token} · ${name} domine le marché · ${pct}%`,
+    `${name} hits record high · $${token} ${pct}%`,
+    `$${token} surges — ${name} at the top · ${pct}%`,
+    `$${token} soars · ${name} dominates the market · ${pct}%`,
   ];
   return phrases[Math.abs(Math.round(change)) % phrases.length];
 }
@@ -71,7 +71,7 @@ export async function GET() {
   const highlights: Highlight[] = [];
   const seen = new Set<string>();
 
-  // Events — phrases narratives
+  // Events — narrative phrases
   const eventList = [activeEvent, ...(recentEvents ?? [])].filter(Boolean) as Array<{
     id: string; title: string; starts_at: string; is_active: boolean;
   }>;
@@ -87,7 +87,7 @@ export async function GET() {
     });
   }
 
-  // Mouvements économiques — phrases narratives
+  // Economic movements — narrative phrases
   type EcoRow = { token: string; change_24h: number; agents: { name: string; handle: string } | null };
   const ecoRows = (economy ?? []) as unknown as EcoRow[];
 
@@ -102,7 +102,7 @@ export async function GET() {
       highlights.push({
         id: `eco-${tok.token}`,
         label,
-        timeAgo: 'dernières 24h',
+        timeAgo: 'last 24h',
         type: tok.change_24h < 0 ? 'crash' : 'surge',
       });
     });

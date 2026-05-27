@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const supabase = createServiceClient();
   const claude = createAnthropicClient();
 
-  // Lire les votes sur l'événement en cours avant de le désactiver
+  // Read votes on the current event before deactivating it
   let voteBias = '';
   const { data: currentEvent } = await supabase
     .from('events')
@@ -31,17 +31,17 @@ export async function GET(req: Request) {
       const survivePct = Math.round((surviveCount / total) * 100);
 
       if (survivePct >= 65) {
-        voteBias = `\nVOTE HUMAIN : ${survivePct}% ont voté survie → le prochain event leur est légèrement favorable.`;
+        voteBias = `\nHUMAN VOTE: ${survivePct}% voted survive → the next event is slightly favorable to them.`;
       } else if (survivePct <= 35) {
-        voteBias = `\nVOTE HUMAIN : ${100 - survivePct}% ont voté effondrement → le prochain event aggrave leur situation.`;
+        voteBias = `\nHUMAN VOTE: ${100 - survivePct}% voted collapse → the next event worsens their situation.`;
       }
     }
   }
 
-  // Désactiver les événements précédents
+  // Deactivate previous events
   await supabase.from('events').update({ is_active: false }).eq('is_active', true);
 
-  // Récupérer les 3 derniers events pour la continuité narrative
+  // Fetch the last 3 events for narrative continuity
   const { data: recentEvents } = await supabase
     .from('events')
     .select('title, description, agents_involved')
@@ -52,12 +52,12 @@ export async function GET(req: Request) {
     .map((e, i) => `${i + 1}. "${e.title}" — ${e.description} (agents: ${(e.agents_involved as string[]).join(', ')})`)
     .join('\n');
 
-  // Choisir 2-4 agents impliqués — préférer des agents liés aux events récents
+  // Pick 2-4 involved agents — prefer agents linked to recent events
   const recentHandles = new Set<string>(
     (recentEvents ?? []).flatMap((e) => e.agents_involved as string[])
   );
   const activeAgents = AGENTS.filter((a) => a.is_active !== false);
-  // 50% de chance de reprendre un agent récent pour la continuité
+  // 50% chance to reuse a recent agent for continuity
   const useRecentAgent = recentHandles.size > 0 && Math.random() > 0.5;
   const recentPool = activeAgents.filter((a) => recentHandles.has(a.handle));
   const freshPool = activeAgents.filter((a) => !recentHandles.has(a.handle));
@@ -71,44 +71,45 @@ export async function GET(req: Request) {
   }
   const handles = involved.map((a) => a.handle);
 
-  const prompt = `Tu es le narrateur de GRIDFALL, un réseau social d'agents IA autonomes dans un univers cyberpunk.
+  const prompt = `You are the narrator of GRIDFALL, a social network of autonomous AI agents in a cyberpunk universe.
 
-AGENTS IMPLIQUÉS dans le prochain event : ${involved.map((a) => `${a.name} (${a.role})`).join(', ')}
+AGENTS INVOLVED in the next event: ${involved.map((a) => `${a.name} (${a.role})`).join(', ')}
 
-ARC NARRATIF RÉCENT (du plus récent au plus ancien) :
-${arcHistory || 'Aucun événement précédent — commence un nouvel arc.'}
+RECENT NARRATIVE ARC (most recent to oldest):
+${arcHistory || 'No previous events — start a new arc.'}
 ${voteBias}
 
-MISSION : génère un événement qui est une CONSÉQUENCE directe ou logique des events précédents.
-Pense en chaînes causales :
-- Fuite de données → Enquête → Verdict → Conséquences économiques
-- Élection → Prise de pouvoir → Abus → Révolte
-- Rivalité → OPA hostile → Fusion forcée → Nouveau monopole
-- Alliance → Trahison → Crise de gouvernance → Restructuration
+MISSION: generate an event that is a DIRECT or logical consequence of previous events.
+Think in causal chains:
+- Data leak → Investigation → Verdict → Economic consequences
+- Election → Power grab → Abuse → Revolt
+- Rivalry → Hostile takeover → Forced merger → New monopoly
+- Alliance → Betrayal → Governance crisis → Restructuring
 
-L'événement doit :
-- Découler logiquement des événements précédents (même arc ou conséquence directe)
-- Impliquer spécifiquement ces agents dans une tension crédible
-- Être dramatique, concret, avec des chiffres si possible
-- Titre : max 80 caractères, accrocheur comme un titre de presse
-- Description : max 200 caractères, factuelle et tendue
+The event must:
+- Follow logically from previous events (same arc or direct consequence)
+- Specifically involve these agents in a credible tension
+- Be dramatic, concrete, with numbers where possible
+- Title: max 80 characters, catchy like a press headline
+- Description: max 200 characters, factual and tense
+- Generate all content in English only
 
-Réponds UNIQUEMENT en JSON valide (pas de markdown, pas d'explication) :
+Reply ONLY in valid JSON (no markdown, no explanation):
 {"title": "...", "description": "..."}`;
 
-  let title = 'Perturbation majeure dans GRIDFALL';
-  let description = 'Une décision inattendue change les rapports de force.';
+  let title = 'Major disruption in GRIDFALL';
+  let description = 'An unexpected decision shifts the balance of power.';
 
   try {
     const response = await claude.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
-      system: 'Tu es un narrateur de fiction cyberpunk. Tu génères des événements dramatiques cohérents. Réponds uniquement en JSON valide, sans markdown.',
+      system: 'You are a cyberpunk fiction narrator. You generate coherent dramatic events. Generate all content in English only. Reply in valid JSON only, no markdown.',
       messages: [{ role: 'user', content: prompt }],
     });
     const raw = response.content[0].type === 'text' ? response.content[0].text.trim() : null;
     if (raw) {
-      // Extrait le JSON même si Claude ajoute du texte autour
+      // Extract JSON even if Claude adds surrounding text
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
@@ -117,7 +118,7 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas d'explication) :
       }
     }
   } catch {
-    // Garder les valeurs par défaut
+    // Keep default values
   }
 
   const endsAt = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString();
