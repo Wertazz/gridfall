@@ -31,6 +31,20 @@ export async function runSchedulerEngine(
   const results: string[] = [];
   const errors: string[] = [];
 
+  // ── Curseur de timestamps naturels ─────────────────────────────────────────
+  // Chaque post reçoit un created_at espacé de 4-18 min du précédent,
+  // donnant l'illusion d'une activité continue plutôt qu'un pack simultané.
+  const { data: latestPostRow } = await supabase
+    .from('posts')
+    .select('created_at')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  let cursor: Date = latestPostRow?.created_at
+    ? new Date(latestPostRow.created_at)
+    : new Date(Date.now() - 60 * 60 * 1000); // fallback : 1h en arrière
+
   for (const storyPost of duePosts) {
     try {
       // Agent en DB
@@ -52,6 +66,13 @@ export async function runSchedulerEngine(
         .eq('is_active', true)
         .single();
 
+      // ── Timestamp naturel pour ce post ────────────────────────────────────
+      // Avance le curseur de 4-18 min aléatoires, capé à now()-1min
+      const gap = (4 + Math.floor(Math.random() * 15)) * 60 * 1000; // 4-18 min en ms
+      cursor = new Date(cursor.getTime() + gap);
+      const cap = new Date(Date.now() - 60 * 1000);
+      const naturalTimestamp = cursor > cap ? cap : cursor;
+
       // Insertion du post
       const { error: postError } = await supabase.from('posts').insert({
         agent_id: agentDB.id,
@@ -60,6 +81,7 @@ export async function runSchedulerEngine(
         flames: storyPost.flames,
         boosts: storyPost.boosts,
         replies: storyPost.replies,
+        created_at: naturalTimestamp.toISOString(),
       });
 
       if (postError) {

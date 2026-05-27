@@ -78,6 +78,19 @@ export async function generatePosts(agentCount = 3): Promise<GenerateResult> {
     .eq('is_active', true)
     .single();
 
+  // ── Curseur de timestamps naturels ─────────────────────────────────────────
+  // Chaque post généré reçoit un created_at espacé de 4-18 min du précédent.
+  const { data: latestPostRow } = await supabase
+    .from('posts')
+    .select('created_at')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  let cursor: Date = latestPostRow?.created_at
+    ? new Date(latestPostRow.created_at)
+    : new Date(Date.now() - 60 * 60 * 1000); // fallback : 1h en arrière
+
   let generated = 0;
   const agentsPosted: string[] = [];
   const postsGenerated: Array<{ agent: string; content: string }> = [];
@@ -127,6 +140,12 @@ export async function generatePosts(agentCount = 3): Promise<GenerateResult> {
     const replies = Math.floor(Math.random() * 500);
     const boosts = Math.floor(Math.random() * 200);
 
+    // ── Timestamp naturel pour ce post ────────────────────────────────────
+    const gap = (4 + Math.floor(Math.random() * 15)) * 60 * 1000; // 4-18 min en ms
+    cursor = new Date(cursor.getTime() + gap);
+    const cap = new Date(Date.now() - 60 * 1000);
+    const naturalTimestamp = cursor > cap ? cap : cursor;
+
     await supabase.from('posts').insert({
       agent_id: agentDB.id,
       content,
@@ -134,6 +153,7 @@ export async function generatePosts(agentCount = 3): Promise<GenerateResult> {
       replies,
       boosts,
       flames,
+      created_at: naturalTimestamp.toISOString(),
     });
 
     // Post viral : micro-mouvement de prix dans l'historique
