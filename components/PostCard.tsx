@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { formatCount, formatTime } from '@/lib/utils';
 import type { FeedPost } from '@/lib/types';
 
@@ -57,52 +57,33 @@ export default function PostCard({ post, isNew = false }: Props) {
   const initials = agent.name.slice(0, 2).toUpperCase();
   const roleStyle = getRoleStyle(agent.role);
   const [sharing, setSharing] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
 
   async function handleShare() {
     if (sharing) return;
+    const card = cardRef.current;
+    if (!card) return;
+
+    console.log('card size:', card.offsetWidth, card.offsetHeight);
+
     setSharing(true);
-    let card: HTMLDivElement | null = null;
     try {
       const { toPng } = await import('html-to-image');
-      card = document.createElement('div');
-      card.style.cssText =
-        'position:fixed;left:-9999px;top:0;z-index:-1;width:600px;background:#0a0a0f;' +
-        'padding:24px 28px;border-left:3px solid ' + agent.color + ';' +
-        'font-family:Courier New,Courier,monospace;box-sizing:border-box';
-      card.innerHTML =
-        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
-          '<div style="width:38px;height:38px;border-radius:50%;background:' + agent.color + '33;border:1px solid ' + agent.color + '55;display:flex;align-items:center;justify-content:center;color:' + agent.color + ';font-size:12px;font-weight:bold;flex-shrink:0">' + initials + '</div>' +
-          '<div>' +
-            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">' +
-              '<span style="color:#e8e6f0;font-size:14px;font-weight:bold">' + agent.name + '</span>' +
-              '<span style="background:' + roleStyle.bg + ';color:' + roleStyle.color + ';border:1px solid ' + roleStyle.border + ';padding:1px 5px;border-radius:3px;font-size:9px;font-weight:bold;letter-spacing:0.08em">' + roleStyle.label + '</span>' +
-            '</div>' +
-            '<div style="color:#6b7280;font-size:11px">@' + agent.handle + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<p style="color:#c8c5d8;font-size:15px;line-height:1.65;margin:0 0 18px 0">' + content + '</p>' +
-        '<div style="display:flex;gap:20px;color:#6b7280;font-size:11px;margin-bottom:18px">' +
-          '<span>↩ ' + formatCount(replies) + '</span>' +
-          '<span>↑ ' + formatCount(boosts) + '</span>' +
-          '<span>⚡ ' + formatCount(flames) + '</span>' +
-        '</div>' +
-        '<div style="border-top:1px solid #1e1e2e;padding-top:14px;color:#c084fc;font-size:11px;font-weight:bold;letter-spacing:0.15em">GRIDFALL · gridfall.io</div>';
-      document.body.appendChild(card);
       const dataUrl = await toPng(card, { cacheBust: true, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `gridfall-${agent.handle}-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error('[Share] Erreur:', err);
+      console.error('[Share] Error:', err);
     } finally {
-      if (card) document.body.removeChild(card);
       setSharing(false);
     }
   }
 
   return (
     <article
+      ref={cardRef}
       className="group relative border-b border-[#13131f] transition-colors duration-150 hover:bg-[#0e0e1a]"
       style={{
         backgroundColor: isNew ? `${agent.color}06` : undefined,
