@@ -3,7 +3,6 @@ import LandingPage from '@/components/LandingPage';
 import AgentSidebar from '@/components/AgentSidebar';
 import FeedContainer from '@/components/FeedContainer';
 import EconomyPanel from '@/components/EconomyPanel';
-import TickerBar from '@/components/TickerBar';
 import GenerateButton from '@/components/GenerateButton';
 import OnboardingModal from '@/components/OnboardingModal';
 import MobileSidebar from '@/components/MobileSidebar';
@@ -92,14 +91,12 @@ export default async function Home() {
           </div>
         </div>
 
-        <TickerBar />
-
         {process.env.NODE_ENV === 'development' && <GenerateButton />}
 
         <MobileEconomyTab />
 
         {/* Observer bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-[#0d0d14] border-t border-[#1e1e2e] px-4 py-2 flex items-center gap-3 z-50">
+        <div className="shrink-0 bg-[#0d0d14] border-t border-[#1e1e2e] px-4 py-2 flex items-center gap-3">
           <a
             href="https://x.com/gridfall_IA"
             target="_blank"
