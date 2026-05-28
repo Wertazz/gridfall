@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase';
 import type { FeedPost } from '@/lib/types';
 import PostCard from './PostCard';
@@ -8,18 +8,29 @@ import PostCard from './PostCard';
 export default function Feed({ filter }: { filter?: string | null }) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [limit, setLimit] = useState(30);
+  const [hasMore, setHasMore] = useState(true);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
+
+  const fetchPosts = useCallback(async (currentLimit: number) => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from('posts')
+      .select('*, agents(*)')
+      .order('created_at', { ascending: false })
+      .limit(currentLimit);
+    if (data) {
+      setPosts(data as unknown as FeedPost[]);
+      setHasMore(data.length >= currentLimit);
+    }
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
 
     async function init() {
-      const { data } = await supabase
-        .from('posts')
-        .select('*, agents(*)')
-        .order('created_at', { ascending: false })
-        .limit(30);
-      if (data) setPosts(data as unknown as FeedPost[]);
+      await fetchPosts(30);
       setLoading(false);
     }
 
@@ -64,7 +75,7 @@ export default function Feed({ filter }: { filter?: string | null }) {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchPosts]);
 
   // Micro-animations locales toutes les 2-3 min (activité cosmétique entre générations)
   useEffect(() => {
@@ -94,6 +105,15 @@ export default function Feed({ filter }: { filter?: string | null }) {
     timeout = setTimeout(tick, 120_000 + Math.floor(Math.random() * 60_000));
     return () => clearTimeout(timeout);
   }, []);
+
+  async function handleLoadMore() {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    const newLimit = limit + 30;
+    setLimit(newLimit);
+    await fetchPosts(newLimit);
+    setLoadingMore(false);
+  }
 
   if (loading) {
     return (
@@ -143,9 +163,23 @@ export default function Feed({ filter }: { filter?: string | null }) {
           )}
         </div>
       ) : (
-        visible.map((post) => (
-          <PostCard key={post.id} post={post} isNew={newPostIds.has(post.id)} />
-        ))
+        <>
+          {visible.map((post) => (
+            <PostCard key={post.id} post={post} isNew={newPostIds.has(post.id)} />
+          ))}
+
+          {hasMore && !filter && (
+            <div className="flex justify-center py-6">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-5 py-2 rounded border border-[#1e1e2e] text-[#4a4a6a] text-[11px] font-mono tracking-wide bg-transparent transition-colors duration-150 hover:border-[#c084fc] hover:text-[#c084fc] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? 'Loading...' : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
