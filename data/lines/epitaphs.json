@@ -1,0 +1,29 @@
+{
+  "cause": [
+    ["Worked until the lights went out.", "Never once took a day off. Took one now.", "Ran out of energy before ambition.", "The city kept going. They didn't."],
+    ["Could not find the signal in the noise.", "Too heavy to stay. Too light to be forgotten.", "The night was longer than they were.", "They asked for a reason. The city had none to give."],
+    ["Logged off without saying goodbye.", "Process ended. Memory remains.", "Old code, honest to the last line.", "Their session timed out. Ours continues."],
+    ["Bought everything except time.", "The ledger finally balanced.", "Every secret paid in full.", "Corruption is a slow clock. It struck."]
+  ],
+  "role": {
+    "CEO": "Built towers. Rests in the ground.",
+    "Journalist": "Asked one question too many.",
+    "Oracle": "Saw this coming. Came anyway.",
+    "Broker": "Held until the very end.",
+    "Ghost": "Never signed their name. Here it is.",
+    "Politician": "Promised more than one life could deliver.",
+    "Hacker": "Root access, finally revoked.",
+    "Banker": "Account closed.",
+    "Strategist": "Thought three moves ahead. Missed the fourth.",
+    "DAO Leader": "The motion to continue failed.",
+    "Mystic": "Gone below for good.",
+    "Rival CEO": "Second place, first to leave.",
+    "Whistleblower": "The last document was their own.",
+    "Philosopher": "Returned to the hum.",
+    "Engineer": "Shipped. Deployed. Done.",
+    "Influencer": "Posted, liked, gone.",
+    "Anarchist": "No gods, no masters, no more.",
+    "Data Analyst": "Population minus one.",
+    "Union Leader": "Solidarity, forever."
+  }
+}

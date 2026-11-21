@@ -1,3 +1,27 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "overrides": [
+    {
+      "files": ["lib/sim/**/*.ts", "lib/micro/**/*.ts"],
+      "rules": {
+        "no-restricted-globals": ["error",
+          { "name": "Date", "message": "Simulation must not read the clock. Pass time in." },
+          { "name": "performance", "message": "Simulation must not read the clock." }
+        ],
+        "no-restricted-properties": ["error",
+          { "object": "Math", "property": "random", "message": "Use the seeded PRNG (lib/sim/prng)." },
+          { "object": "Math", "property": "sin", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "cos", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "tan", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "exp", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "log", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "pow", "message": "Transcendental functions differ across engines." },
+          { "object": "Math", "property": "sqrt", "message": "Use integer math in the simulation." }
+        ],
+        "no-restricted-syntax": ["error",
+          { "selector": "ForInStatement", "message": "Object key order is not part of the world. Iterate arrays." }
+        ]
+      }
+    }
+  ]
 }
