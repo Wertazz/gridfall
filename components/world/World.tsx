@@ -8,6 +8,7 @@ import WorldCanvas from './WorldCanvas';
 import TopBar from './TopBar';
 import Wire from './Wire';
 import Dossier from './Dossier';
+import Politics from './Politics';
 
 type Props = { fixedT?: number | null; focus?: string | null };
 
@@ -22,6 +23,7 @@ export default function World({ fixedT = null, focus = null }: Props) {
   const [selected, setSelected] = useState(-1);
   const [wireOpen, setWireOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [polOpen, setPolOpen] = useState(false);
   const [mode] = useState<TimeMode>(fixedT ? { kind: 'fixed', t: fixedT } : { kind: 'live' });
 
   useEffect(() => { engine.mode = mode; }, [engine, mode]);
@@ -53,7 +55,8 @@ export default function World({ fixedT = null, focus = null }: Props) {
   return (
     <main className="fixed inset-0 bg-[#050508] overflow-hidden">
       <WorldCanvas engine={engine} onSelect={onSelect} />
-      <TopBar view={view} observers={null} mode={mode.kind} wireOpen={wireOpen} onWire={() => setWireOpen((o) => !o)} />
+      <TopBar view={view} observers={null} mode={mode.kind} wireOpen={wireOpen} onWire={() => setWireOpen((o) => !o)} onPolitics={() => setPolOpen((o) => !o)} />
+      {polOpen && <Politics view={view} onFocus={(u) => { onFocus(u); setPolOpen(false); }} onClose={() => setPolOpen(false)} />}
       {wireOpen && <Wire view={view} onFocus={onFocus} onClip={clipEvent} onClose={() => setWireOpen(false)} />}
       {selected >= 0 && <Dossier view={view} uid={selected} onClose={() => { setSelected(-1); engine.follow = false; }} onFocus={onFocus} onClip={(uid) => view && share(view.tMs, uid)} />}
       {!view && <div className="absolute inset-0 flex items-center justify-center text-[#4b5563] text-xs font-mono">computing the world…</div>}

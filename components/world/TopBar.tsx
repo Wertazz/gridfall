@@ -6,14 +6,14 @@ import { profileOf } from '@/lib/sim/profile';
 import { darknessAt } from '@/lib/render/renderer';
 import Link from 'next/link';
 
-type Props = { view: View | null; observers: number | null; mode: string; onWire: () => void; wireOpen: boolean };
+type Props = { view: View | null; observers: number | null; mode: string; onWire: () => void; wireOpen: boolean; onPolitics: () => void };
 
 export function clockLabel(minute: number) {
   const day = Math.floor(minute / 1440) + 1, m = minute % 1440;
   return { day, time: `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}` };
 }
 
-export default function TopBar({ view, observers, mode, onWire, wireOpen }: Props) {
+export default function TopBar({ view, observers, mode, onWire, wireOpen, onPolitics }: Props) {
   const c = view ? clockLabel(view.minute) : null;
   const night = view ? darknessAt(view.minuteOfDay) > 0.3 : false;
   const pres = view ? view.cur.politics.president : -1;
@@ -34,9 +34,9 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen }: Prop
         </span>
       )}
       <span className="hidden md:inline text-[#4b5563]">|</span>
-      <span className="hidden md:inline text-[#9ca3af] whitespace-nowrap truncate">
-        President: <span style={{ color: presP?.color ?? '#6b7280' }}>{presP ? presP.name : 'Interim (SYSTEM)'}</span>
-      </span>
+      <button onClick={onPolitics} className="text-[#9ca3af] whitespace-nowrap truncate hover:text-[#e8e6f0]" title="Eden Hall: president, laws, election">
+        <span className="hidden md:inline">President: </span><span aria-hidden className="md:hidden">⚖ </span><span style={{ color: presP?.color ?? '#6b7280' }}>{presP ? presP.name : 'Interim'}</span>
+      </button>
       <span className="hidden lg:inline text-[#9ca3af] truncate max-w-[280px]" title={laws.join(', ')}>
         Laws: <span className="text-[#fbbf24]">{laws.length ? laws.join(' · ') : 'none'}</span>
       </span>

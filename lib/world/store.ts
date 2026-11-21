@@ -2,8 +2,9 @@
 import { CHECKPOINT_HOURS } from '../sim/config';
 import { genesisState, stepHour } from '../sim/step';
 import { cloneState, deserialize, type WorldState } from '../sim/state';
+import { simFingerprint } from '../sim/fingerprint';
 
-type Index = { count: number; every: number; genesis: number; version: number };
+type Index = { count: number; every: number; genesis: number; version: number; fingerprint?: string };
 const SYNC_REPLAY_LIMIT = 2 * CHECKPOINT_HOURS + 48;
 const CACHE_MAX = 72;
 
@@ -18,9 +19,11 @@ export class StateStore {
 
   async init(targetHour: number) {
     try {
-      const r = await fetch(`${this.base}/index.json`, { cache: 'force-cache' });
+      const r = await fetch(`${this.base}/index.json`, { cache: 'no-cache' });
       if (r.ok) this.index = await r.json();
     } catch { this.index = null; }
+    // Checkpoints computed by another version of the simulation are useless: ignore them.
+    if (this.index && this.index.fingerprint !== simFingerprint()) this.index = null;
     await this.seek(targetHour);
     this.ready = true;
   }
@@ -28,7 +31,7 @@ export class StateStore {
   private async loadCheckpoint(k: number): Promise<WorldState | null> {
     if (k <= 0 || !this.index || k >= this.index.count) return null;
     try {
-      const r = await fetch(`${this.base}/${k}.bin`, { cache: 'force-cache' });
+      const r = await fetch(`${this.base}/${k}.bin?v=${this.index.fingerprint}`, { cache: 'force-cache' });
       if (!r.ok) return null;
       const buf = await r.arrayBuffer();
       const dv = new DataView(buf);

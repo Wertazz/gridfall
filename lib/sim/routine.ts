@@ -36,7 +36,7 @@ export function placeOf(s: WorldState, slot: number, h: number): number {
       if (a.uid === arc.a) return P.UNION;
       if (leader >= 0 && a.uid !== arc.b && (a.faction === F.EDEN || s.rel[slot * N_MAX + leader] > 30)) return P.UNION;
     }
-    if (arc.type === ARC.AFFAIR && hod === 23 && (arc.a === a.uid || arc.b === a.uid)) return P.ALLEY;
+    if (arc.type === ARC.AFFAIR && hod === 23 && (arc.a === a.uid || arc.b === a.uid) && (!(s.politics.laws & L.CURFEW) || (a.traits & T.ZEALOT))) return P.ALLEY;
     if (arc.type === ARC.BANKRUN && h - arc.start < 6 && hod >= 8 && hod <= 20 && a.money > 50000 && ((a.uid + arc.start) % 3 === 0)) return P.VAULT;
   }
 

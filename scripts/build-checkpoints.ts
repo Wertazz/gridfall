@@ -4,6 +4,7 @@ import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { genesisState, stepHour } from '../lib/sim/step';
 import { serialize } from '../lib/sim/state';
+import { simFingerprint } from '../lib/sim/fingerprint';
 import { CHECKPOINT_HOURS, GENESIS_MS, HOUR_MS } from '../lib/sim/config';
 import { STORYLETS, SID } from '../lib/sim/storylets';
 
@@ -34,6 +35,6 @@ for (let k = 1; k < count; k++) {
   for (let i = 0; i < words.length; i++) buf.writeInt32LE(words[i], i * 4);
   writeFileSync(path.join(out, `${k}.bin`), buf);
 }
-writeFileSync(path.join(out, 'index.json'), JSON.stringify({ count, every: CHECKPOINT_HOURS, genesis: GENESIS_MS, version: 1 }));
+writeFileSync(path.join(out, 'index.json'), JSON.stringify({ count, every: CHECKPOINT_HOURS, genesis: GENESIS_MS, version: 1, fingerprint: simFingerprint() }));
 writeFileSync(path.join(out, 'markers.json'), JSON.stringify(markers));
 console.log(`[checkpoints] ${count - 1} files up to world hour ${endHour} (${markers.length} markers) in ${Date.now() - t0} ms`);
