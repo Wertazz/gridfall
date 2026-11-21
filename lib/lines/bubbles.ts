@@ -5,12 +5,13 @@ import { eventText, chatterLine } from './grammar';
 import type { View } from '../world/engine';
 import type { Bubble } from '../render/renderer';
 import { darknessAt } from '../render/renderer';
+import { corrupt } from './glitch';
 
 const EVENT_SPAN = 5;   // world minutes a line stays up (25 real s)
 const REPLY_DELAY = 1.5;
 const CHAT_WINDOW = 3;
 
-export function computeBubbles(v: View, extra: Bubble[] = []): Bubble[] {
+export function computeBubbles(v: View, extra: Bubble[] = [], glitch = 0): Bubble[] {
   const now = v.tw / 60_000;
   const out: Bubble[] = [];
   const alive = new Set(v.poses.map((p) => p.uid));
@@ -41,5 +42,7 @@ export function computeBubbles(v: View, extra: Bubble[] = []): Bubble[] {
       out.push({ uid, text: chatterLine(v.cur, uid, place, w, night), color: v.profiles.get(uid)?.color ?? '#9ca3af', age, major: -1 });
     }
   }
-  return out.concat(extra);
+  const all = out.concat(extra);
+  if (glitch > 0) for (const b of all) b.text = corrupt(b.text, b.uid * 977 + Math.floor(now), glitch);
+  return all;
 }

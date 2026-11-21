@@ -7,7 +7,7 @@ import { isRaining } from '../sim/storylets';
 import { StateStore } from './store';
 import { Renderer, type Bubble, type Eye } from '../render/renderer';
 
-export type TimeMode = { kind: 'live' } | { kind: 'fixed'; t: number } | { kind: 'oracle'; ahead: number };
+export type TimeMode = { kind: 'live' } | { kind: 'fixed'; t: number; at?: number } | { kind: 'oracle'; ahead: number };
 
 export type View = {
   tMs: number; tw: number; minute: number; H: number; minuteOfDay: number; day: number;
@@ -33,7 +33,7 @@ export class WorldEngine {
 
   timeNow(): number {
     const now = Date.now();
-    if (this.mode.kind === 'fixed') return this.mode.t;
+    if (this.mode.kind === 'fixed') return this.mode.t + (now - (this.mode.at ?? now));
     if (this.mode.kind === 'oracle') return now + Math.min(ORACLE_MS, Math.max(0, this.mode.ahead));
     return now;
   }

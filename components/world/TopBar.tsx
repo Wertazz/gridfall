@@ -24,12 +24,12 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen, onPoli
     <header className="absolute top-0 left-0 right-0 z-20 flex items-center gap-2 sm:gap-3 px-3 h-11 min-w-0 overflow-hidden bg-[#0a0a0f]/85 backdrop-blur border-b border-[#1e1e2e] text-[11px] font-mono">
       <span className="text-[#c084fc] font-bold tracking-[0.2em] sm:tracking-[0.25em] text-[11px] sm:text-xs shrink-0">GRIDFALL</span>
       {c && (
-        <span className="text-[#e8e6f0] tabular-nums whitespace-nowrap" title="World clock">
+        <span className="tabular-nums whitespace-nowrap" style={{ color: mode === 'oracle' ? '#60a5fa' : mode === 'fixed' ? '#fbbf24' : '#e8e6f0' }} title="World clock">
           <span aria-hidden>{night ? '☾' : '☀'}</span> Day {c.day} — {c.time}
         </span>
       )}
       {mode !== 'live' && (
-        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider ${mode === 'oracle' ? 'bg-[#60a5fa]/15 text-[#60a5fa]' : 'bg-[#fbbf24]/15 text-[#fbbf24]'}`}>
+        <span className={`hidden sm:inline px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider ${mode === 'oracle' ? 'bg-[#60a5fa]/15 text-[#60a5fa]' : 'bg-[#fbbf24]/15 text-[#fbbf24]'}`}>
           {mode === 'oracle' ? 'FUTURE' : 'PAST'}
         </span>
       )}
@@ -46,7 +46,7 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen, onPoli
         )}
         {view && (
           <Link href="/proof" className="text-[#4b5563] hover:text-[#c084fc] tabular-nums whitespace-nowrap" title="Every visitor sees this exact hash. Click to learn why.">
-            <span className="hidden sm:inline">WORLD STATE </span>#{view.hash.slice(0, 8)}
+            <span className="hidden sm:inline">WORLD STATE </span>#{view.hash.slice(0, 6)}<span className="hidden sm:inline">{view.hash.slice(6, 8)}</span>
           </Link>
         )}
         <button onClick={onWire} className={`px-2 py-1 rounded border text-[10px] tracking-wider whitespace-nowrap ${wireOpen ? 'border-[#c084fc]/60 text-[#c084fc]' : 'border-[#1e1e2e] text-[#9ca3af] hover:text-[#c084fc]'}`}>

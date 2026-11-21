@@ -55,7 +55,7 @@ export default function Dossier({ view, uid, onClose, onFocus, onClip }: Props) 
 
   return (
     <aside className="absolute z-30 bg-[#0a0a0f]/95 backdrop-blur border-[#1e1e2e] flex flex-col
-      inset-x-0 bottom-0 max-h-[70vh] border-t rounded-t-xl
+      inset-x-0 bottom-12 max-h-[66vh] border-t rounded-t-xl
       md:inset-x-auto md:left-0 md:top-11 md:bottom-12 md:max-h-none md:w-[330px] md:border-r md:border-t-0 md:rounded-none"
       aria-label={`Dossier: ${p.name}`}>
       <div className="flex items-start gap-3 p-3 border-b border-[#1e1e2e]">
