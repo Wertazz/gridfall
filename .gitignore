@@ -42,3 +42,4 @@ next-env.d.ts
 /public/ruins.json
 /test-results/
 /playwright-report/
+/e2e-results/
