@@ -31,7 +31,7 @@
 
   "token_launch": { "params": ["token", "cents"], "ra": "win", "rb": "market",
     "title": ["{A} launches {token} at {cents}", "New token on the Exchange: {token}", "{token} is born"],
-    "a": ["Introducing {token}. Opening price {cents}. History starts now. #sign#", "{token} is live. Get in or get left behind.", "I built {token} so you don't have to believe in anything else. #win#"],
+    "a": ["Introducing {token}. Opening price {cents}. History starts now. #sign#", "{token} is live. Get in or get left behind.", "I minted {token} so you don't have to believe in anything else. #win#"],
     "b": ["Another token. Another prayer. #market#"] },
 
   "token_delisting": { "params": ["token"], "ra": "loss", "rb": "loss",

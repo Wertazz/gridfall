@@ -28,6 +28,7 @@ export class WorldEngine {
   private raf = 0;
   private last: View | null = null;
   private hashCache = new Map<number, string>();
+  private profCache: { key: string; map: Map<number, Profile> } | null = null;
   private listeners = new Set<(v: View) => void>();
   private lastEmit = 0;
 
@@ -46,9 +47,15 @@ export class WorldEngine {
     if (!prev || !cur) return this.last;
     let hash = this.hashCache.get(cur.hour);
     if (!hash) { hash = stateHash(cur); this.hashCache.set(cur.hour, hash); if (this.hashCache.size > 64) this.hashCache.delete(this.hashCache.keys().next().value as number); }
-    const profiles = new Map<number, Profile>();
-    for (const a of prev.agents) if (a.uid >= 0) profiles.set(a.uid, profileFrom(a, a.alive === 1));
-    for (const a of cur.agents) if (a.uid >= 0) profiles.set(a.uid, profileFrom(a, a.alive === 1));
+    const pkey = `${prev.hour}|${cur.hour}|${hash}`;
+    let profiles: Map<number, Profile>;
+    if (this.profCache && this.profCache.key === pkey) profiles = this.profCache.map;
+    else {
+      profiles = new Map<number, Profile>();
+      for (const a of prev.agents) if (a.uid >= 0) profiles.set(a.uid, profileFrom(a, a.alive === 1));
+      for (const a of cur.agents) if (a.uid >= 0) profiles.set(a.uid, profileFrom(a, a.alive === 1));
+      this.profCache = { key: pkey, map: profiles };
+    }
     const v: View = { tMs, tw, minute, H, minuteOfDay: minute % 1440, day: Math.floor(minute / 1440), prev, cur, hash, poses: allPoses(prev, cur, tw), profiles };
     this.last = v;
     return v;

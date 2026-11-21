@@ -19,13 +19,13 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
     const ro = new ResizeObserver(() => {
       if (!engine.renderer) return;
       const rect = canvas.getBoundingClientRect();
-      r().resize(rect.width, rect.height, Math.min(3, window.devicePixelRatio || 1));
+      r().resize(rect.width, rect.height, Math.min(2, window.devicePixelRatio || 1));
     });
     ro.observe(canvas);
     const initSize = setInterval(() => {
       if (!engine.renderer) return;
       const rect = canvas.getBoundingClientRect();
-      r().resize(rect.width, rect.height, Math.min(3, window.devicePixelRatio || 1));
+      r().resize(rect.width, rect.height, Math.min(2, window.devicePixelRatio || 1));
       // Start zoomed on the heart of the city.
       const cam = r().cam; cam.z = Math.min(cam.maxZ, cam.minZ + (rect.width < 700 ? 1 : 1));
       cam.x = 27 * 16; cam.y = 24 * 16; cam.clamp(r().w, r().h);

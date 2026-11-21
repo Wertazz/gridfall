@@ -56,6 +56,20 @@ export default function World({ fixedT = null, focus: focusProp = null }: Props)
     if (p) { setSelected(p.uid); engine.follow = true; }
   }, [focus, view, selected, engine]);
 
+  // Escape closes the topmost panel.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (ruin !== null) setRuin(null);
+      else if (polOpen) setPolOpen(false);
+      else if (selected >= 0) { setSelected(-1); engine.follow = false; }
+      else if (wireOpen) setWireOpen(false);
+      else if (mode.kind !== 'live') setMode({ kind: 'live' });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [ruin, polOpen, selected, wireOpen, mode, engine]);
+
   // After the first-visit line: zoom from the whole map into the heart of the city.
   const onboarded = useCallback(() => {
     const zoomIn = (k: number) => {

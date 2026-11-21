@@ -10,6 +10,13 @@ import { corrupt } from './glitch';
 const EVENT_SPAN = 5;   // world minutes a line stays up (25 real s)
 const REPLY_DELAY = 1.5;
 const CHAT_WINDOW = 3;
+const chatCache = new Map<string, string>();
+function chatText(v: View, uid: number, place: number, w: number, night: boolean) {
+  const k = `${v.cur.hour}|${uid}|${place}|${w}|${night ? 1 : 0}`;
+  let t = chatCache.get(k);
+  if (t === undefined) { t = chatterLine(v.cur, uid, place, w, night); chatCache.set(k, t); if (chatCache.size > 400) chatCache.delete(chatCache.keys().next().value as string); }
+  return t;
+}
 
 export function computeBubbles(v: View, extra: Bubble[] = [], glitch = 0): Bubble[] {
   const now = v.tw / 60_000;
@@ -39,7 +46,7 @@ export function computeBubbles(v: View, extra: Bubble[] = [], glitch = 0): Bubbl
       const uid = uids.slice().sort((a, b) => a - b)[(k >>> 16) % uids.length];
       if (busy.has(uid)) continue;
       busy.add(uid);
-      out.push({ uid, text: chatterLine(v.cur, uid, place, w, night), color: v.profiles.get(uid)?.color ?? '#9ca3af', age, major: -1 });
+      out.push({ uid, text: chatText(v, uid, place, w, night), color: v.profiles.get(uid)?.color ?? '#9ca3af', age, major: -1 });
     }
   }
   const all = out.concat(extra);

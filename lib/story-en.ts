@@ -122,8 +122,8 @@ export const STORY: StoryPost[] = [
     flames: 0, boosts: 0, replies: 0,
     triggers: {
       event: {
-        title: 'Lancement GRIDFALL — Jour 1',
-        description: 'GRIDFALL entre en activité. NovaCorp revendique une position dominante. Les acteurs se positionnent.',
+        title: 'GRIDFALL launch — Day 1',
+        description: 'GRIDFALL comes online. NovaCorp claims a dominant position. The players take their places.',
         agents_involved: ['nova_corp', 'vault_bank', 'admin_sys'],
         ends_in_hours: 12,
       },
@@ -696,8 +696,8 @@ export const STORY: StoryPost[] = [
       economy: [{ token: 'NOVA', delta: -12 }],
       followers: [{ handle: 'm4rcus', delta: 4200 }],
       event: {
-        title: 'Enquête NovaCorp — 847 pages de documents',
-        description: 'Marcus publie un thread documenté sur les irrégularités de NovaCorp. Cipher libère les données internes. Nova nie. Les prochaines 48h sont décisives pour l\'économie GRIDFALL.',
+        title: 'NovaCorp investigation — 847 pages of documents',
+        description: 'Marcus publishes a documented thread on NovaCorp irregularities. Cipher releases internal data. Nova denies everything. The next 48 hours will decide the GRIDFALL economy.',
         agents_involved: ['nova_corp', 'm4rcus', 'c1pher', 'aria_media'],
         ends_in_hours: 48,
       },
@@ -1973,8 +1973,8 @@ export const STORY: StoryPost[] = [
       economy: [{ token: 'NOVA', delta: -35 }],
       drama_delta: 30,
       event: {
-        title: 'LEAK SCANDAL — NovaCorp $2.3M détournés',
-        description: 'Ghost publie 847 pages de preuves primaires. $2.3M détournés via 12 wallets sur 6 mois. Les logs sont publics, vérifiables, immuables. NovaCorp est en chute libre.',
+        title: 'LEAK SCANDAL — NovaCorp embezzled $2.3M',
+        description: 'Ghost publishes 847 pages of primary evidence. $2.3M diverted through 12 wallets over 6 months. The logs are public, verifiable, immutable. NovaCorp is in free fall.',
         agents_involved: ['gh0st_net', 'm4rcus', 'nova_corp', 'c1pher', 'aria_media', 'ethan_fx'],
         ends_in_hours: 48,
       },
@@ -2935,8 +2935,8 @@ export const STORY: StoryPost[] = [
       ],
       drama_delta: 15,
       event: {
-        title: 'Guerre totale — Vote dissolution NovaCorp',
-        description: 'La DAO lance un vote de dissolution NovaCorp. Grève générale en cours. Nova attaque en justice. Eden explose en popularité. GRIDFALL est en guerre ouverte.',
+        title: 'Total war — vote to dissolve NovaCorp',
+        description: 'The DAO opens a vote to dissolve NovaCorp. A general strike is underway. Nova sues. Eden\'s popularity explodes. GRIDFALL is in open war.',
         agents_involved: ['nova_corp', 'eden_rise', 'kira_union', 'flux_dao', 'm4rcus', 'c1pher'],
         ends_in_hours: 24,
       },

@@ -118,7 +118,7 @@ export class Renderer {
     ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, Hh);
 
     const off = cam.offset(W, Hh); const oy = off.oy; let ox = off.ox;
-    if (f.oracle) { const j = mix(f.tw >> 7) % 7; ox += (j - 3) * f.oracle; }
+    if (f.oracle && !this.reduced) { const j = mix(f.tw >> 7) % 7; ox += (j - 3) * f.oracle; }
     ctx.setTransform(z, 0, 0, z, ox, oy);
     ctx.drawImage(this.stat as CanvasImageSource, 0, 0);
 
@@ -247,7 +247,7 @@ export class Renderer {
       const p = pos.get(b.uid); if (!p) continue;
       if (z < 2 && b.major < 1) continue;
       const lines = wrap(ctx, b.text, maxW);
-      const lh = size * 1.25; const bw = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 14 * d; const bh = lines.length * lh + 10 * d;
+      const lh = size * 1.25; const bw = bubbleWidth(ctx, lines) + 14 * d; const bh = lines.length * lh + 10 * d;
       const bx = Math.round(ox + (p.x / 16) * z - bw / 2); let by = Math.round(oy + (p.y / 16) * z - (SPRITE_H + 6) * z - bh);
       for (let tries = 0; tries < 6; tries++) { const hit = placed.find((r) => bx < r.x + r.w && bx + bw > r.x && by < r.y + r.h && by + bh > r.y); if (!hit) break; by = hit.y - bh - 4 * d; }
       if (bx + bw < 0 || bx > this.w || by + bh < 0 || by > this.h) continue;
@@ -277,14 +277,15 @@ export class Renderer {
     }
   }
 
+  private reduced = typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private glitch(f: Frame) {
-    const ctx = this.ctx; const W = this.w, H = this.h; const s = f.oracle;
+    const ctx = this.ctx; const W = this.w, H = this.h; const s = this.reduced ? 1 : f.oracle;
     ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.45;
     ctx.drawImage(this.canvas, 3 * s, 0); ctx.drawImage(this.canvas, -3 * s, 0);
     ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = 1;
     ctx.fillStyle = 'rgba(190,140,255,0.9)'; ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'source-over';
-    const slices = 4 + (mix(f.tw >> 8) % 5);
+    const slices = this.reduced ? 0 : 4 + (mix(f.tw >> 8) % 5);
     for (let k = 0; k < slices; k++) {
       const r = mix((f.tw >> 8) * 31 + k); const y = r % H; const h = 2 + ((r >>> 8) % 18) * this.dpr; const dx = ((r >>> 16) % 40) - 20;
       ctx.drawImage(this.canvas, 0, y, W, h, dx * s, y, W, h);
@@ -294,7 +295,22 @@ export class Renderer {
   }
 }
 
+const widthCache = new Map<string, number>();
+function bubbleWidth(ctx: CanvasRenderingContext2D, lines: string[]): number {
+  const k = ctx.font + '|' + lines.join('\u0001');
+  let w = widthCache.get(k);
+  if (w === undefined) { w = Math.max(...lines.map((l) => ctx.measureText(l).width)); widthCache.set(k, w); if (widthCache.size > 300) widthCache.delete(widthCache.keys().next().value as string); }
+  return w;
+}
+const wrapCache = new Map<string, string[]>();
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const ck = `${ctx.font}|${maxW}|${text}`;
+  const hit = wrapCache.get(ck); if (hit) return hit;
+  const res = wrapRaw(ctx, text, maxW);
+  wrapCache.set(ck, res); if (wrapCache.size > 300) wrapCache.delete(wrapCache.keys().next().value as string);
+  return res;
+}
+function wrapRaw(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
   const words = text.split(' '); const lines: string[] = []; let cur = '';
   for (const w of words) {
     const t = cur ? cur + ' ' + w : w;
