@@ -11,6 +11,8 @@ import Dossier from './Dossier';
 import Politics from './Politics';
 import Ruin from './Ruin';
 import Timeline from './Timeline';
+import { startPresence } from '@/lib/world/presence';
+import { eyesBubbles } from '@/lib/lines/fourth-wall';
 import { RUIN_SPOTS, GRAVE_SPOTS, TILE } from '@/lib/micro/map';
 
 type Props = { fixedT?: number | null; focus?: string | null };
@@ -28,11 +30,19 @@ export default function World({ fixedT = null, focus = null }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [polOpen, setPolOpen] = useState(false);
   const [ruin, setRuin] = useState<number | null>(null);
+  const [observers, setObservers] = useState<number | null>(null);
   const [mode, setMode] = useState<TimeMode>(fixedT ? { kind: 'fixed', t: fixedT } : { kind: 'live' });
 
   useEffect(() => { engine.mode = mode.kind === 'fixed' ? { ...mode, at: Date.now() } : mode; }, [engine, mode]);
   const glitch = mode.kind === 'oracle' ? 18 + Math.floor(mode.ahead / 30_000) : 0;
-  useEffect(() => { engine.bubbleSource = (v) => computeBubbles(v, [], glitch); }, [engine, glitch]);
+  useEffect(() => { engine.bubbleSource = (v) => computeBubbles(v, glitch ? [] : eyesBubbles(v, engine.eyes), glitch); }, [engine, glitch]);
+  useEffect(() => {
+    const h = startPresence({
+      getCamera: () => (engine.renderer ? { x: engine.renderer.cam.x, y: engine.renderer.cam.y } : null),
+      onEyes: (eyes, n) => { engine.eyes = eyes; setObservers(n); },
+    });
+    return () => h.stop();
+  }, [engine]);
   useEffect(() => engine.subscribe(setView), [engine]);
   useEffect(() => { engine.selected = selected; }, [engine, selected]);
   useEffect(() => { if (typeof window !== 'undefined' && window.innerWidth >= 1024) setWireOpen(true); }, []);
@@ -74,7 +84,7 @@ export default function World({ fixedT = null, focus = null }: Props) {
   return (
     <main className="fixed inset-0 bg-[#050508] overflow-hidden">
       <WorldCanvas engine={engine} onSelect={onSelect} />
-      <TopBar view={view} observers={null} mode={mode.kind} wireOpen={wireOpen} onWire={() => setWireOpen((o) => !o)} onPolitics={() => setPolOpen((o) => !o)} />
+      <TopBar view={view} observers={observers} mode={mode.kind} wireOpen={wireOpen} onWire={() => setWireOpen((o) => !o)} onPolitics={() => setPolOpen((o) => !o)} />
       {polOpen && <Politics view={view} onFocus={(u) => { onFocus(u); setPolOpen(false); }} onClose={() => setPolOpen(false)} />}
       {wireOpen && <Wire view={view} glitch={glitch} onFocus={onFocus} onClip={clipEvent} onClose={() => setWireOpen(false)} />}
       {selected >= 0 && <Dossier view={view} uid={selected} onClose={() => { setSelected(-1); engine.follow = false; }} onFocus={onFocus} onClip={(uid) => view && share(view.tMs, uid)} />}

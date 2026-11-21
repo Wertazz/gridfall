@@ -138,7 +138,13 @@ export class Renderer {
       else if (p.moving) pose = [POSE.WALK1, POSE.IDLE, POSE.WALK2, POSE.IDLE][(f.tw >> 10) % 4];
       else if (talking.has(p.uid)) pose = (f.tw >> 11) % 2 ? POSE.TALK : POSE.IDLE;
       else if (p.newborn && (f.tw >> 11) % 3 === 0) pose = POSE.CHEER;
-      ctx.drawImage(sprite(pr.shape, pr.color, pr.skin, p.dir, pose) as CanvasImageSource, wx, wy);
+      let dir = p.dir;
+      if (!p.moving && !p.dying && f.eyes.length) {
+        // Agents glance at nearby observers (cosmetic).
+        const near = f.eyes.find((e) => Math.abs(e.x - p.x / 16) < 80 && Math.abs(e.y - p.y / 16) < 64);
+        if (near && (f.tw >> 12) % 3 !== 0) dir = near.x < p.x / 16 ? 1 : 2;
+      }
+      ctx.drawImage(sprite(pr.shape, pr.color, pr.skin, dir, pose) as CanvasImageSource, wx, wy);
     }
 
     // Night.
@@ -219,7 +225,7 @@ export class Renderer {
 
   private drawEyes(f: Frame, ox: number, oy: number) {
     if (!f.eyes.length) return;
-    const ctx = this.ctx; const z = this.cam.z; const s = Math.max(1, Math.floor(z / 2));
+    const ctx = this.ctx; const z = this.cam.z; const s = Math.max(2, Math.round(z * 0.8));
     const img = eyeSprite() as CanvasImageSource;
     for (const e of f.eyes) {
       const bob = ((f.tw >> 9) + Math.floor(e.x)) % 4 < 2 ? 0 : 1;
