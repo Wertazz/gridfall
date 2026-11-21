@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prebuild": "tsx scripts/build-checkpoints.ts && tsx scripts/build-ruins.ts",
+    "test": "vitest run",
+    "shots": "tsx scripts/capture.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.93.0",

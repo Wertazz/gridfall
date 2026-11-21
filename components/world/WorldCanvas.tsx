@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { WorldEngine } from '@/lib/world/engine';
 
-type Props = { engine: WorldEngine; onSelect: (uid: number) => void; onCamera?: (x: number, y: number) => void };
+type Props = { engine: WorldEngine; onSelect: (uid: number, wx: number, wy: number) => void; onCamera?: (x: number, y: number) => void };
 
 /** Full-screen canvas with pan (drag), zoom (wheel / pinch, integer steps) and tap-to-select. */
 export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
@@ -81,7 +81,7 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
         const dx = p.x / 16 - w.x, dy = p.y / 16 - 6 - w.y; const d = dx * dx + dy * dy;
         if (d < bd) { bd = d; best = p.uid; }
       }
-      onSelect(best);
+      onSelect(best, w.x, w.y);
     };
     const onWheel = (e: WheelEvent) => {
       e.preventDefault(); if (!engine.renderer) return;

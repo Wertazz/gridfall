@@ -6,7 +6,7 @@ import { profileOf, traitList } from '@/lib/sim/profile';
 import { SECRET_NAMES, PLACE_NAMES } from '@/lib/sim/roster';
 import { N_MAX } from '@/lib/sim/config';
 import { placeOf } from '@/lib/sim/routine';
-import { eventText, money } from '@/lib/lines/grammar';
+import { eventText, money, epitaph } from '@/lib/lines/grammar';
 import { sprite, POSE } from '@/lib/render/sprites';
 import { timeLabel } from './Wire';
 
@@ -143,7 +143,13 @@ export default function Dossier({ view, uid, onClose, onFocus, onClip }: Props) 
             <p className="mt-1 text-[#c8c5d8]">{votes.map((u) => profileOf(s, u).name).join(' → ')}</p>
           </section>
         )}
-        {!a && grave && <p className="text-[#9ca3af]">Estate at death: {money(grave.money)}. Buried in the Cemetery.</p>}
+        {(!a || !a.alive) && grave && (
+          <section className="border border-[#1e1e2e] rounded p-3 text-center">
+            <p className="text-[10px] font-mono tracking-widest text-[#6b7280]">HERE LIES {p.name.toUpperCase()}</p>
+            <p className="text-[#e8e6f0] italic mt-1">“{epitaph(uid, grave.cause, p.role)}”</p>
+            <p className="text-[10px] font-mono text-[#4b5563] mt-2">Day {Math.floor(grave.born / 24) + 1} — Day {Math.floor(grave.died / 24) + 1} · estate {money(grave.money)}</p>
+          </section>
+        )}
       </div>
     </aside>
   );

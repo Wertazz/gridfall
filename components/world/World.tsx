@@ -9,6 +9,8 @@ import TopBar from './TopBar';
 import Wire from './Wire';
 import Dossier from './Dossier';
 import Politics from './Politics';
+import Ruin from './Ruin';
+import { RUIN_SPOTS, GRAVE_SPOTS, TILE } from '@/lib/micro/map';
 
 type Props = { fixedT?: number | null; focus?: string | null };
 
@@ -24,6 +26,7 @@ export default function World({ fixedT = null, focus = null }: Props) {
   const [wireOpen, setWireOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [polOpen, setPolOpen] = useState(false);
+  const [ruin, setRuin] = useState<number | null>(null);
   const [mode] = useState<TimeMode>(fixedT ? { kind: 'fixed', t: fixedT } : { kind: 'live' });
 
   useEffect(() => { engine.mode = mode; }, [engine, mode]);
@@ -39,7 +42,21 @@ export default function World({ fixedT = null, focus = null }: Props) {
     if (p) { setSelected(p.uid); engine.follow = true; }
   }, [focus, view, selected, engine]);
 
-  const onSelect = useCallback((uid: number) => { setSelected(uid); engine.follow = false; }, [engine]);
+  const onSelect = useCallback((uid: number, wx: number, wy: number) => {
+    engine.follow = false;
+    if (uid >= 0) { setSelected(uid); return; }
+    const tx = Math.floor(wx / TILE), ty = Math.floor(wy / TILE);
+    const r = RUIN_SPOTS.find((s) => (tx === s.x || tx === s.x + 1) && (ty === s.y || ty === s.y - 1));
+    if (r) { setRuin(r.day); return; }
+    const v = engine.view();
+    const gi = GRAVE_SPOTS.findIndex((g) => g.x === tx && (g.y === ty || g.y === ty + 1));
+    if (v && gi >= 0) {
+      const first = v.cur.deaths - v.cur.graves.length;
+      const g = v.cur.graves.find((_, k) => (first + k) % GRAVE_SPOTS.length === gi);
+      if (g) { setSelected(g.uid); return; }
+    }
+    setSelected(-1);
+  }, [engine]);
   const onFocus = useCallback((uid: number) => { setSelected(uid); engine.follow = true; }, [engine]);
 
   const share = useCallback(async (tMs: number, uid: number) => {
@@ -59,6 +76,7 @@ export default function World({ fixedT = null, focus = null }: Props) {
       {polOpen && <Politics view={view} onFocus={(u) => { onFocus(u); setPolOpen(false); }} onClose={() => setPolOpen(false)} />}
       {wireOpen && <Wire view={view} onFocus={onFocus} onClip={clipEvent} onClose={() => setWireOpen(false)} />}
       {selected >= 0 && <Dossier view={view} uid={selected} onClose={() => { setSelected(-1); engine.follow = false; }} onFocus={onFocus} onClip={(uid) => view && share(view.tMs, uid)} />}
+      {ruin !== null && <Ruin day={ruin} onClose={() => setRuin(null)} />}
       {!view && <div className="absolute inset-0 flex items-center justify-center text-[#4b5563] text-xs font-mono">computing the world…</div>}
       {toast && <div className="absolute z-40 top-14 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded bg-[#c084fc] text-black text-[11px] font-mono font-bold">{toast}</div>}
     </main>

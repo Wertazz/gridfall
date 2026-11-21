@@ -3,6 +3,7 @@ import STORY from '../../data/lines/storylets.json';
 import VOICES from '../../data/lines/voices.json';
 import BORN from '../../data/lines/born.json';
 import CHATTER from '../../data/lines/chatter.json';
+import EPITAPHS from '../../data/lines/epitaphs.json';
 import { Rng, CH, key } from '../sim/prng';
 import { STORYLETS } from '../sim/storylets';
 import { TOKEN_NAMES, LAW_NAMES, LAW_LIST, PLACE_NAMES, SECRET_NAMES, FOUNDERS, N_MAX_EXPORT } from './refs';
@@ -171,3 +172,10 @@ export function eyesLine(s: WorldState, uid: number, place: number, n: number, w
 }
 
 void FOUNDERS;
+
+export function epitaph(uid: number, cause: number, role: string): string {
+  const k = key(CH.LINE, uid, 4242);
+  const byCause = (EPITAPHS.cause as string[][])[cause] ?? EPITAPHS.cause[2];
+  const byRole = (EPITAPHS.role as Record<string, string>)[role];
+  return k % 3 === 0 && byRole ? byRole : byCause[k % byCause.length];
+}
