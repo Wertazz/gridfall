@@ -77,8 +77,10 @@ function route(a: Pt, b: Pt): Pt[] {
 /** Wandering inside a place. `since` = world ms when the agent arrived (anchor). */
 function wander(place: number, uid: number, tw: number, since: number): { p: Pt; moving: boolean; dir: number } {
   const anchor = tileCenter(PLACES_GEO[place].anchor);
-  const w = Math.floor(tw / WANDER_SLOT);
-  const slotStart = w * WANDER_SLOT;
+  // Each agent has its own rhythm, so the crowd never moves in lockstep.
+  const phase = key(CH.WANDER, uid, 777) % WANDER_SLOT;
+  const w = Math.floor((tw + phase) / WANDER_SLOT);
+  const slotStart = w * WANDER_SLOT - phase;
   // Arrived during this slot: wait at the anchor until the next slot.
   if (slotStart < since) return { p: anchor, moving: false, dir: 0 };
   const to = poi(place, uid, w);

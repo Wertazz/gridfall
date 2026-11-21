@@ -27,7 +27,7 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
       const rect = canvas.getBoundingClientRect();
       r().resize(rect.width, rect.height, Math.min(2, window.devicePixelRatio || 1));
       // Start zoomed on the heart of the city.
-      const cam = r().cam; cam.z = Math.min(cam.maxZ, cam.minZ + (rect.width < 700 ? 1 : 1));
+      const cam = r().cam; cam.z = cam.defaultZ;
       cam.x = 27 * 16; cam.y = 24 * 16; cam.clamp(r().w, r().h);
       clearInterval(initSize);
     }, 30);
@@ -44,6 +44,7 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
     };
 
     const onDown = (e: PointerEvent) => {
+      engine.lastInteract = performance.now();
       canvas.setPointerCapture(e.pointerId);
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pts.size === 1) { downAt = performance.now(); downX = e.clientX; downY = e.clientY; moved = 0; }
@@ -85,6 +86,7 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
     };
     const onWheel = (e: WheelEvent) => {
       e.preventDefault(); if (!engine.renderer) return;
+      engine.lastInteract = performance.now();
       const R = r(); const rect = canvas.getBoundingClientRect();
       zoomAt((e.clientX - rect.left) * R.dpr, (e.clientY - rect.top) * R.dpr, e.deltaY < 0 ? 1 : -1);
     };

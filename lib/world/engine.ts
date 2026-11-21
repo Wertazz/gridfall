@@ -22,6 +22,11 @@ export class WorldEngine {
   mode: TimeMode = { kind: 'live' };
   selected = -1;
   follow = false;
+  /** performance.now() of the last user camera gesture; the auto-director waits 20 s after it. */
+  lastInteract = -1e9;
+  private dirTarget: { x: number; y: number } | null = null;
+  private dirAt = -1e9;
+  private framed = false;
   eyes: Eye[] = [];
   bubbleSource: ((v: View) => Bubble[]) | null = null;
   font = '"Courier New", monospace';
@@ -61,6 +66,36 @@ export class WorldEngine {
     return v;
   }
 
+  /** Auto-director: when nobody touches the camera, glide to where something is happening. */
+  private direct(v: View) {
+    const R = this.renderer; if (!R || this.follow) return;
+    const now = performance.now();
+    if (now - this.lastInteract < 20_000) return;
+    if (now - this.dirAt > 5000 || !this.dirTarget) { this.dirAt = now; this.dirTarget = this.pickTarget(v); }
+    const t = this.dirTarget; if (!t) return;
+    const cam = R.cam;
+    if (!this.framed) { cam.x = t.x; cam.y = t.y; this.framed = true; }
+    else { cam.x += (t.x - cam.x) * 0.02; cam.y += (t.y - cam.y) * 0.02; }
+    cam.clamp(R.w, R.h);
+  }
+
+  private pickTarget(v: View): { x: number; y: number } | null {
+    const pos = new Map(v.poses.map((p) => [p.uid, p]));
+    for (let k = v.cur.log.length - 1; k >= 0; k--) {
+      const e = v.cur.log[k]; const start = e.hour * 60 + e.minute;
+      if (start > v.minute) continue;
+      if (v.minute - start > 25) break;
+      const p = pos.get(e.a) ?? pos.get(e.b);
+      if (p && e.sid >= 0 && (e.a >= 0 || e.b >= 0)) return { x: p.x / 16, y: p.y / 16 - 10 };
+    }
+    const groups = new Map<number, { n: number; x: number; y: number }>();
+    for (const p of v.poses) { const g = groups.get(p.place) ?? { n: 0, x: 0, y: 0 }; g.n++; g.x += p.x / 16; g.y += p.y / 16; groups.set(p.place, g); }
+    let best: { n: number; x: number; y: number } | null = null;
+    groups.forEach((g) => { if (!best || g.n > best.n) best = g; });
+    const b = best as { n: number; x: number; y: number } | null;
+    return b ? { x: b.x / b.n, y: b.y / b.n - 10 } : null;
+  }
+
   subscribe(fn: (v: View) => void) { this.listeners.add(fn); return () => { this.listeners.delete(fn); }; }
 
   async start(canvas: HTMLCanvasElement) {
@@ -69,6 +104,7 @@ export class WorldEngine {
     const loop = () => {
       this.raf = requestAnimationFrame(loop);
       const v = this.view(); if (!v || !this.renderer) return;
+      this.direct(v);
       if (this.follow && this.selected >= 0) {
         const p = v.poses.find((q) => q.uid === this.selected);
         if (p) { const cam = this.renderer.cam; cam.x += (p.x / 16 - cam.x) * 0.12; cam.y += (p.y / 16 - 8 - cam.y) * 0.12; cam.clamp(this.renderer.w, this.renderer.h); }

@@ -14,6 +14,7 @@ import Timeline from './Timeline';
 import { startPresence } from '@/lib/world/presence';
 import { eyesBubbles } from '@/lib/lines/fourth-wall';
 import Onboarding from './Onboarding';
+import Breaking from './Breaking';
 import { RUIN_SPOTS, GRAVE_SPOTS, TILE } from '@/lib/micro/map';
 
 type Props = { fixedT?: number | null; focus?: string | null };
@@ -75,9 +76,9 @@ export default function World({ fixedT = null, focus: focusProp = null }: Props)
     const zoomIn = (k: number) => {
       const R = engine.renderer; if (!R) { setTimeout(() => zoomIn(k), 100); return; }
       if (k === 0) R.cam.z = R.cam.minZ;
-      else if (R.cam.z < Math.min(R.cam.maxZ, R.cam.minZ + 1)) R.cam.z++;
+      else if (R.cam.z < R.cam.defaultZ) R.cam.z++;
       R.cam.clamp(R.w, R.h);
-      if (k < 3) setTimeout(() => zoomIn(k + 1), 350);
+      if (k < 5) setTimeout(() => zoomIn(k + 1), 300);
     };
     if (!fixedT && !focus) zoomIn(0);
   }, [engine, fixedT, focus]);
@@ -117,6 +118,7 @@ export default function World({ fixedT = null, focus: focusProp = null }: Props)
       {wireOpen && <Wire view={view} glitch={glitch} onFocus={onFocus} onClip={clipEvent} onClose={() => setWireOpen(false)} />}
       {selected >= 0 && <Dossier view={view} uid={selected} onClose={() => { setSelected(-1); engine.follow = false; }} onFocus={onFocus} onClip={(uid) => view && share(view.tMs, uid)} />}
       <Timeline mode={mode} viewT={view && mode.kind !== 'live' ? view.tMs : null} onMode={setMode} />
+      {!glitch && <Breaking view={view} onFocus={onFocus} />}
       <Onboarding onDone={onboarded} />
       {ruin !== null && <Ruin day={ruin} onClose={() => setRuin(null)} />}
       {!view && <div className="absolute inset-0 flex items-center justify-center text-[#4b5563] text-xs font-mono">computing the world…</div>}

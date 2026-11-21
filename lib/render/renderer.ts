@@ -3,6 +3,7 @@ import { MAP_W, MAP_H, TILE, PLACES_GEO, GRAVE_SPOTS, LAMPS } from '../micro/map
 import { drawStatic, WINDOWS, NEON_SPOTS } from './tiles';
 import { sprite, eyeSprite, POSE, SPRITE_W, SPRITE_H } from './sprites';
 import { pixelText } from './font';
+import { carsAt, drawCar, beam } from './traffic';
 import { mix } from '../sim/prng';
 import { P, TOKEN_NAMES } from '../sim/roster';
 import { ARC, type WorldState } from '../sim/state';
@@ -20,7 +21,7 @@ function makeCanvas(w: number, h: number): Canvas {
 
 /** Darkness by minute of day (0..1440) → alpha 0..0.66, piecewise linear, integers in /1000. */
 const DARK = (() => {
-  const pts: Array<[number, number]> = [[0, 660], [300, 660], [420, 120], [480, 0], [1080, 0], [1200, 380], [1320, 660], [1440, 660]];
+  const pts: Array<[number, number]> = [[0, 480], [300, 480], [420, 90], [480, 0], [1080, 0], [1200, 280], [1320, 480], [1440, 480]];
   const out = new Int16Array(1440);
   for (let m = 0; m < 1440; m++) {
     let k = 0; while (pts[k + 1][0] <= m) k++;
@@ -43,10 +44,11 @@ export type Frame = {
 
 export class Camera {
   x = WORLD_PX_W / 2; y = WORLD_PX_H / 2; z = 2;
-  minZ = 1; maxZ = 8;
+  minZ = 1; maxZ = 8; defaultZ = 3;
   fit(w: number, h: number, dpr: number) {
     this.minZ = Math.max(1, Math.floor(Math.min(w / WORLD_PX_W, h / WORLD_PX_H)));
     this.maxZ = Math.max(this.minZ + 2, Math.round(8 * Math.max(1, dpr / 1.5)));
+    this.defaultZ = Math.min(this.maxZ, Math.max(this.minZ + 2, Math.round(2 * dpr)));
     this.z = Math.min(this.maxZ, Math.max(this.minZ, this.z));
   }
   clamp(w: number, h: number) {
@@ -123,6 +125,9 @@ export class Renderer {
     ctx.drawImage(this.stat as CanvasImageSource, 0, 0);
 
     this.drawProps(f);
+    const cars = carsAt(f.tw);
+    const nightNow = darknessAt(f.minuteOfDay) > 0.2;
+    for (const car of cars) drawCar(ctx, car, nightNow);
 
     // Agents, sorted by y.
     const talking = new Set(f.bubbles.filter((b) => b.age < 1).map((b) => b.uid));
@@ -151,6 +156,8 @@ export class Renderer {
     const dark = darknessAt(f.minuteOfDay);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (dark > 0) { ctx.fillStyle = `rgba(6,4,22,${dark})`; ctx.fillRect(0, 0, W, Hh); }
+    const daylight = Math.max(0, 1 - dark / 0.3);
+    if (daylight > 0) { ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = `rgba(70,78,118,${0.22 * daylight})`; ctx.fillRect(0, 0, W, Hh); ctx.globalCompositeOperation = 'source-over'; }
 
     // Lights.
     ctx.setTransform(z, 0, 0, z, ox, oy);
@@ -161,9 +168,12 @@ export class Renderer {
       ctx.globalAlpha = Math.min(1, dark * 1.4);
       ctx.drawImage(this.lights as CanvasImageSource, 0, 0);
       ctx.globalAlpha = Math.min(1, 0.25 + dark);
-      for (const l of LAMPS) { const g = this.glow('#fde68a'); ctx.drawImage(g as CanvasImageSource, l.x * TILE - 16, l.y * TILE - 20, 48, 48); }
+      ctx.globalAlpha = Math.min(0.8, dark * 1.3);
+      for (const l of LAMPS) { const g = this.glow('#fbbf6a'); ctx.drawImage(g as CanvasImageSource, l.x * TILE - 4, l.y * TILE - 2, 24, 24); ctx.fillStyle = '#fff1c1'; ctx.fillRect(l.x * TILE + 7, l.y * TILE + 9, 2, 2); }
+      ctx.globalAlpha = Math.min(1, dark * 1.6);
+      for (const car of cars) beam(ctx, car);
     }
-    ctx.globalAlpha = 0.35 + dark * 0.8;
+    ctx.globalAlpha = 0.45 + dark * 0.9;
     for (const n of NEON_SPOTS) ctx.drawImage(this.glow(n.color) as CanvasImageSource, n.x - n.r, n.y - n.r, n.r * 2, n.r * 2);
     // Bank run alarm.
     if (f.cur.arcs.some((a) => a.type === ARC.BANKRUN) && (f.tw >> 9) % 2 === 0) {
@@ -192,6 +202,7 @@ export class Renderer {
     this.drawEyes(f, ox, oy);
     this.drawBubbles(f, ox, oy);
     this.drawLabels(ox, oy);
+    this.drawNames(f, ox, oy);
     if (f.oracle) this.glitch(f);
   }
 
@@ -237,7 +248,7 @@ export class Renderer {
 
   private drawBubbles(f: Frame, ox: number, oy: number) {
     const ctx = this.ctx; const z = this.cam.z; const d = this.dpr;
-    const size = Math.round(Math.max(9, Math.min(13, 4 + z * 1.3)) * d);
+    const size = Math.round(Math.max(12, Math.min(16, 7 + z * 1.8)) * (d > 1 ? d * 0.85 : 1));
     ctx.font = `${size}px ${f.font}`; ctx.textBaseline = 'top';
     const pos = new Map(f.poses.map((p) => [p.uid, p]));
     const maxW = Math.min(260 * d, this.w * 0.6);
@@ -248,7 +259,7 @@ export class Renderer {
       if (z < 2 && b.major < 1) continue;
       const lines = wrap(ctx, b.text, maxW);
       const lh = size * 1.25; const bw = bubbleWidth(ctx, lines) + 14 * d; const bh = lines.length * lh + 10 * d;
-      const bx = Math.round(ox + (p.x / 16) * z - bw / 2); let by = Math.round(oy + (p.y / 16) * z - (SPRITE_H + 6) * z - bh);
+      const bx = Math.max(4 * d, Math.min(this.w - bw - 4 * d, Math.round(ox + (p.x / 16) * z - bw / 2))); let by = Math.round(oy + (p.y / 16) * z - (SPRITE_H + 6) * z - bh);
       for (let tries = 0; tries < 6; tries++) { const hit = placed.find((r) => bx < r.x + r.w && bx + bw > r.x && by < r.y + r.h && by + bh > r.y); if (!hit) break; by = hit.y - bh - 4 * d; }
       if (bx + bw < 0 || bx > this.w || by + bh < 0 || by > this.h) continue;
       placed.push({ x: bx, y: by, w: bw, h: bh });
@@ -260,6 +271,19 @@ export class Renderer {
       ctx.fillStyle = b.major >= 2 ? '#ffffff' : '#d6d3e6';
       lines.forEach((l, k) => ctx.fillText(l, bx + 8 * d, by + 5 * d + k * lh));
       ctx.globalAlpha = 1;
+    }
+  }
+
+  private drawNames(f: Frame, ox: number, oy: number) {
+    const z = this.cam.z; if (z < 3) return;
+    const ctx = this.ctx; const d = this.dpr;
+    ctx.font = `${Math.round(8 * d + (z - 3) * d)}px ${f.font}`; ctx.textBaseline = 'top';
+    for (const p of f.poses) {
+      const pr = f.profiles.get(p.uid); if (!pr || p.dying) continue;
+      const tw = ctx.measureText(pr.name).width;
+      const x = Math.round(ox + (p.x / 16) * z - tw / 2), y = Math.round(oy + (p.y / 16 + 5) * z);
+      ctx.fillStyle = 'rgba(5,5,8,0.55)'; ctx.fillRect(x - 2 * d, y - d, tw + 4 * d, 10 * d + (z - 3) * d);
+      ctx.fillStyle = p.uid === f.selected ? '#ffffff' : pr.color; ctx.fillText(pr.name, x, y);
     }
   }
 

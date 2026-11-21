@@ -33,12 +33,12 @@ export function computeBubbles(v: View, extra: Bubble[] = [], glitch = 0): Bubbl
   // Ambient chatter: one random present agent per busy place per window.
   const busy = new Set(out.map((b) => b.uid));
   const byPlace = new Map<number, number[]>();
-  for (const p of v.poses) if (!p.moving && !p.dying) { const l = byPlace.get(p.place) ?? []; l.push(p.uid); byPlace.set(p.place, l); }
+  for (const p of v.poses) if (!p.dying) { const l = byPlace.get(p.place) ?? []; l.push(p.uid); byPlace.set(p.place, l); }
   const night = darknessAt(v.minuteOfDay) > 0.4;
   for (const [place, uids] of Array.from(byPlace.entries())) {
     for (const w of [Math.floor(now / CHAT_WINDOW), Math.floor(now / CHAT_WINDOW) - 1]) {
       const k = key(CH.CHAT, place, w);
-      const odds = uids.length >= 2 ? 45 : 12;
+      const odds = uids.length >= 2 ? 72 : 30;
       if (k % 100 >= odds) continue;
       const start = w * CHAT_WINDOW + ((k >>> 8) % 100) / 100;
       const age = (now - start) / CHAT_WINDOW;
