@@ -1,5 +1,6 @@
 import WorldClient from '@/components/world/WorldClient';
 
-export default function Home({ searchParams }: { searchParams: { focus?: string } }) {
-  return <WorldClient focus={searchParams.focus ?? null} />;
+// Static shell: the world is computed entirely in the browser.
+export default function Home() {
+  return <WorldClient />;
 }

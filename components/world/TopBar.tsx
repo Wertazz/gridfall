@@ -5,6 +5,8 @@ import { LAW_LIST, LAW_NAMES } from '@/lib/sim/roster';
 import { profileOf } from '@/lib/sim/profile';
 import { darknessAt } from '@/lib/render/renderer';
 import Link from 'next/link';
+import Sound from './Sound';
+import Notify from './Notify';
 
 type Props = { view: View | null; observers: number | null; mode: string; onWire: () => void; wireOpen: boolean; onPolitics: () => void };
 
@@ -21,7 +23,7 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen, onPoli
   const laws = view ? LAW_LIST.filter((b) => view.cur.politics.laws & b).map((b) => LAW_NAMES[b]) : [];
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-20 flex items-center gap-2 sm:gap-3 px-3 h-11 min-w-0 overflow-hidden bg-[#0a0a0f]/85 backdrop-blur border-b border-[#1e1e2e] text-[11px] font-mono">
+    <header className="absolute top-0 left-0 right-0 z-20 flex items-center gap-2 sm:gap-3 px-3 h-11 min-w-0 bg-[#0a0a0f]/85 backdrop-blur border-b border-[#1e1e2e] text-[11px] font-mono">
       <span className="text-[#c084fc] font-bold tracking-[0.2em] sm:tracking-[0.25em] text-[11px] sm:text-xs shrink-0">GRIDFALL</span>
       {c && (
         <span className="tabular-nums whitespace-nowrap" style={{ color: mode === 'oracle' ? '#60a5fa' : mode === 'fixed' ? '#fbbf24' : '#e8e6f0' }} title="World clock">
@@ -35,7 +37,7 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen, onPoli
       )}
       <span className="hidden md:inline text-[#4b5563]">|</span>
       <button onClick={onPolitics} className="text-[#9ca3af] whitespace-nowrap truncate hover:text-[#e8e6f0]" title="Eden Hall: president, laws, election">
-        <span className="hidden md:inline">President: </span><span aria-hidden className="md:hidden">⚖ </span><span style={{ color: presP?.color ?? '#6b7280' }}>{presP ? presP.name : 'Interim'}</span>
+        <span className="hidden md:inline">President: </span><span aria-hidden className="md:hidden">⚖</span><span className="hidden min-[480px]:inline" style={{ color: presP?.color ?? '#6b7280' }}>{presP ? presP.name : 'Interim'}</span>
       </button>
       <span className="hidden lg:inline text-[#9ca3af] truncate max-w-[280px]" title={laws.join(', ')}>
         Laws: <span className="text-[#fbbf24]">{laws.length ? laws.join(' · ') : 'none'}</span>
@@ -44,6 +46,8 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen, onPoli
         {observers !== null && (
           <span className="hidden sm:inline text-[#9ca3af] whitespace-nowrap" title="People watching right now">👁 {observers}</span>
         )}
+        <span className="hidden sm:inline-flex"><Sound view={view} /></span>
+        <Notify />
         {view && (
           <Link href="/proof" className="text-[#4b5563] hover:text-[#c084fc] tabular-nums whitespace-nowrap" title="Every visitor sees this exact hash. Click to learn why.">
             <span className="hidden sm:inline">WORLD STATE </span>#{view.hash.slice(0, 6)}<span className="hidden sm:inline">{view.hash.slice(6, 8)}</span>

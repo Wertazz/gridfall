@@ -28,7 +28,7 @@ function clock(minute: number) {
   return `DAY ${Math.floor(minute / 1440) + 1} — ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
-export function momentImage(m: Moment | null, focus?: string | null) {
+export function momentImage(m: Moment | null, focus?: string | null, cacheSeconds = 31536000) {
   const s = m?.state;
   const ev = m?.event ?? null;
   const speakerUid = ev ? (ev.a >= 0 ? ev.a : ev.b) : -1;
@@ -75,6 +75,6 @@ export function momentImage(m: Moment | null, focus?: string | null) {
         </div>
       </div>
     ),
-    OG_SIZE,
+    { ...OG_SIZE, headers: { 'Cache-Control': `public, max-age=60, s-maxage=${cacheSeconds}, stale-while-revalidate=600` } },
   );
 }

@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GRIDFALL — The World That Runs On Nothing
 
-## Getting Started
+A pixel-art city of autonomous agents who work, scheme, vote, get rich, go broke and die — continuously, in front of everyone.
 
-First, run the development server:
+**No server runs it.** The world is a pure function of the UTC clock and one fixed seed:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+state(T) = simulate(SEED, T)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Every visitor, on any device, computes the same city at the same instant, to the pixel. A short hash in the corner (`WORLD STATE #…`) proves it: two phones, one hash.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Consequences:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Running cost: $0.** No LLM calls, no cron, no simulation backend.
+2. **Every second has a permalink.** `/t/2026-12-03T21:14:00Z` replays the city at that moment, back to Genesis.
+3. **The future is already computed.** Luna, the Oracle, can see it. So can you — ten minutes ahead, through static.
 
-## Learn More
+Season 1 (a seven-day social feed) is not erased: its ruins stand in the south-west of the map, and its 514 posts are readable at `/archive`.
 
-To learn more about Next.js, take a look at the following resources:
+## How it works
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Layer | What | Where |
+| --- | --- | --- |
+| Clock | 1 real minute = 12 world minutes; one macro step per world hour | `lib/sim/config.ts` |
+| Macro-sim | economy, relations, moods, factions, elections, laws, deaths, births — integers only | `lib/sim/` |
+| Storylets | 69 narrative rules with conditions, seeded odds, effects and lines | `lib/sim/storylets.ts` |
+| Language | procedural grammars over a hand-written corpus, assembled at runtime | `data/lines/`, `lib/lines/` |
+| Micro-sim | schedules → deterministic A* walks → fixed-point positions | `lib/micro/` |
+| Rendering | Canvas 2D, integer zoom, procedural tiles and sprites, day/night | `lib/render/` |
+| Checkpoints | one serialized state per real day, built at deploy time | `scripts/build-checkpoints.ts` |
+| Observers | Supabase Realtime Presence → floating eyes (cosmetic only) | `lib/world/presence.ts` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Determinism rules: seeded PRNG keyed by `(seed, hour, channel, …)`, money in cents, no transcendental math, no clock reads and no unordered iteration inside the simulation (enforced by ESLint).
 
-## Deploy on Vercel
+## Develop
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test
+```
+
+Tests cover: identical hashes for the same instant, checkpoint + replay equal to a full replay, a year of world under a time budget, invariants over a simulated month (no negative money, no agent inside a wall, an election every week), law effects, and that observers can never touch the state.
+
+`npm run build` regenerates checkpoints and the Season 1 artefacts (`prebuild`).
+
+## Environment
+
+| Variable | Used for |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | observer presence (optional — the world runs without it) |
+| `SUPABASE_SERVICE_ROLE_KEY` | waitlist, server-side only |
+| `ADMIN_KEY` | `/admin` waitlist export, checked server-side |
