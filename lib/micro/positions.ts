@@ -1,7 +1,7 @@
 // Micro-sim: where every agent stands at a given world millisecond.
 // Pure integer fixed-point math: 1 tile = 256 units, 1 world pixel = 16 units.
 import { MAP_W, PLACES_GEO, AREA_TILES } from './map';
-import { paths } from './path';
+import { astar } from './path';
 import { placeOf } from '../sim/routine';
 import { CH, key, mix } from '../sim/prng';
 import { HOUR_MINUTES } from '../sim/config';
@@ -11,7 +11,6 @@ export const UNIT = 256;
 const WORLD_MS_PER_MIN = 60_000;
 const SPEED = 4 * UNIT;                  // units per world minute (4 tiles/min)
 const WANDER_SLOT = 6 * WORLD_MS_PER_MIN; // a new hangout spot every 6 world minutes
-const WANDER_MOVE = 90_000;               // reach it within 90 world seconds
 
 export type Pose = {
   slot: number; uid: number;
@@ -47,20 +46,6 @@ function dirOf(dx: number, dy: number, fallback = 0): number {
 }
 const dist = (a: Pt, b: Pt) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
-/** Wandering inside a place. `since` = world ms when the agent arrived (anchor). */
-function wander(place: number, uid: number, tw: number, since: number): { p: Pt; moving: boolean; dir: number } {
-  const anchor = tileCenter(PLACES_GEO[place].anchor);
-  const w = Math.floor(tw / WANDER_SLOT);
-  const slotStart = w * WANDER_SLOT;
-  // Arrived during this slot: wait at the anchor until the next slot.
-  if (slotStart < since) return { p: anchor, moving: false, dir: 0 };
-  const to = poi(place, uid, w);
-  const from = slotStart - WANDER_SLOT < since ? anchor : poi(place, uid, w - 1);
-  const t = tw - slotStart;
-  const moving = t < WANDER_MOVE && dist(from, to) > 16;
-  return { p: lerp(from, to, t, WANDER_MOVE), moving, dir: dirOf(to.x - from.x, to.y - from.y) };
-}
-
 /** Walk along a polyline of points at SPEED. */
 function along(pts: Pt[], elapsedMs: number): { p: Pt; dir: number; done: boolean } {
   let d = Math.floor((elapsedMs * SPEED) / WORLD_MS_PER_MIN);
@@ -73,6 +58,34 @@ function along(pts: Pt[], elapsedMs: number): { p: Pt; dir: number; done: boolea
   return { p: last, dir: 0, done: true };
 }
 function polyLength(pts: Pt[]): number { let L = 0; for (let k = 1; k < pts.length; k++) L += dist(pts[k - 1], pts[k]); return L; }
+
+const routeCache = new Map<number, Pt[]>();
+/** Walkable polyline from a to b (A* between their tiles, endpoints kept exact). */
+function route(a: Pt, b: Pt): Pt[] {
+  const ta = ((a.y / UNIT) | 0) * MAP_W + ((a.x / UNIT) | 0), tb = ((b.y / UNIT) | 0) * MAP_W + ((b.x / UNIT) | 0);
+  const k = ta * 4096 + tb;
+  let mid = routeCache.get(k);
+  if (!mid) {
+    const p = astar(ta % MAP_W, (ta / MAP_W) | 0, tb % MAP_W, (tb / MAP_W) | 0);
+    mid = p.slice(1, -1).map(idxCenter);
+    routeCache.set(k, mid);
+    if (routeCache.size > 6000) routeCache.delete(routeCache.keys().next().value as number);
+  }
+  return [a, ...mid, b];
+}
+
+/** Wandering inside a place. `since` = world ms when the agent arrived (anchor). */
+function wander(place: number, uid: number, tw: number, since: number): { p: Pt; moving: boolean; dir: number } {
+  const anchor = tileCenter(PLACES_GEO[place].anchor);
+  const w = Math.floor(tw / WANDER_SLOT);
+  const slotStart = w * WANDER_SLOT;
+  // Arrived during this slot: wait at the anchor until the next slot.
+  if (slotStart < since) return { p: anchor, moving: false, dir: 0 };
+  const to = poi(place, uid, w);
+  const from = slotStart - WANDER_SLOT < since ? anchor : poi(place, uid, w - 1);
+  const walk = along(route(from, to), tw - slotStart);
+  return { p: walk.p, moving: !walk.done, dir: walk.dir };
+}
 
 /**
  * prev = state current during hour H-1 (hour field = H), cur = state for hour H (hour field = H+1).
@@ -105,8 +118,7 @@ export function poseAt(prev: WorldState, cur: WorldState, slot: number, tw: numb
     return { slot, uid: a.uid, x: w.p.x, y: w.p.y, dir: w.dir, moving: w.moving, place: from, dying: false, newborn };
   }
   const startPt = wander(from, a.uid, depart, hourStart - HOUR_MINUTES * WORLD_MS_PER_MIN).p;
-  const route = paths()[from][to];
-  const pts: Pt[] = [startPt, ...route.map(idxCenter)];
+  const pts: Pt[] = route(startPt, tileCenter(PLACES_GEO[to].anchor));
   const walk = along(pts, tw - depart);
   if (!walk.done) return { slot, uid: a.uid, x: walk.p.x, y: walk.p.y, dir: walk.dir, moving: true, place: to, dying: false, newborn };
   const arrival = depart + Math.ceil((polyLength(pts) * WORLD_MS_PER_MIN) / SPEED);

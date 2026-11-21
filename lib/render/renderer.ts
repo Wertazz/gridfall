@@ -117,7 +117,7 @@ export class Renderer {
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, Hh);
 
-    let { ox, oy } = cam.offset(W, Hh);
+    const off = cam.offset(W, Hh); const oy = off.oy; let ox = off.ox;
     if (f.oracle) { const j = mix(f.tw >> 7) % 7; ox += (j - 3) * f.oracle; }
     ctx.setTransform(z, 0, 0, z, ox, oy);
     ctx.drawImage(this.stat as CanvasImageSource, 0, 0);
@@ -242,7 +242,7 @@ export class Renderer {
       if (z < 2 && b.major < 1) continue;
       const lines = wrap(ctx, b.text, maxW);
       const lh = size * 1.25; const bw = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 14 * d; const bh = lines.length * lh + 10 * d;
-      let bx = Math.round(ox + (p.x / 16) * z - bw / 2), by = Math.round(oy + (p.y / 16) * z - (SPRITE_H + 6) * z - bh);
+      const bx = Math.round(ox + (p.x / 16) * z - bw / 2); let by = Math.round(oy + (p.y / 16) * z - (SPRITE_H + 6) * z - bh);
       for (let tries = 0; tries < 6; tries++) { const hit = placed.find((r) => bx < r.x + r.w && bx + bw > r.x && by < r.y + r.h && by + bh > r.y); if (!hit) break; by = hit.y - bh - 4 * d; }
       if (bx + bw < 0 || bx > this.w || by + bh < 0 || by > this.h) continue;
       placed.push({ x: bx, y: by, w: bw, h: bh });
