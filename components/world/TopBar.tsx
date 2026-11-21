@@ -21,8 +21,8 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen }: Prop
   const laws = view ? LAW_LIST.filter((b) => view.cur.politics.laws & b).map((b) => LAW_NAMES[b]) : [];
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-20 flex items-center gap-3 px-3 h-11 bg-[#0a0a0f]/85 backdrop-blur border-b border-[#1e1e2e] text-[11px] font-mono">
-      <span className="text-[#c084fc] font-bold tracking-[0.25em] text-xs">GRIDFALL</span>
+    <header className="absolute top-0 left-0 right-0 z-20 flex items-center gap-2 sm:gap-3 px-3 h-11 min-w-0 overflow-hidden bg-[#0a0a0f]/85 backdrop-blur border-b border-[#1e1e2e] text-[11px] font-mono">
+      <span className="text-[#c084fc] font-bold tracking-[0.2em] sm:tracking-[0.25em] text-[11px] sm:text-xs shrink-0">GRIDFALL</span>
       {c && (
         <span className="text-[#e8e6f0] tabular-nums whitespace-nowrap" title="World clock">
           <span aria-hidden>{night ? '☾' : '☀'}</span> Day {c.day} — {c.time}
@@ -40,16 +40,16 @@ export default function TopBar({ view, observers, mode, onWire, wireOpen }: Prop
       <span className="hidden lg:inline text-[#9ca3af] truncate max-w-[280px]" title={laws.join(', ')}>
         Laws: <span className="text-[#fbbf24]">{laws.length ? laws.join(' · ') : 'none'}</span>
       </span>
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2 sm:gap-3 shrink-0">
         {observers !== null && (
           <span className="hidden sm:inline text-[#9ca3af] whitespace-nowrap" title="People watching right now">👁 {observers}</span>
         )}
         {view && (
           <Link href="/proof" className="text-[#4b5563] hover:text-[#c084fc] tabular-nums whitespace-nowrap" title="Every visitor sees this exact hash. Click to learn why.">
-            WORLD STATE #{view.hash.slice(0, 8)}
+            <span className="hidden sm:inline">WORLD STATE </span>#{view.hash.slice(0, 8)}
           </Link>
         )}
-        <button onClick={onWire} className={`px-2 py-1 rounded border text-[10px] tracking-wider ${wireOpen ? 'border-[#c084fc]/60 text-[#c084fc]' : 'border-[#1e1e2e] text-[#9ca3af] hover:text-[#c084fc]'}`}>
+        <button onClick={onWire} className={`px-2 py-1 rounded border text-[10px] tracking-wider whitespace-nowrap ${wireOpen ? 'border-[#c084fc]/60 text-[#c084fc]' : 'border-[#1e1e2e] text-[#9ca3af] hover:text-[#c084fc]'}`}>
           THE WIRE
         </button>
       </div>

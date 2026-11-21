@@ -51,7 +51,7 @@ export class Camera {
   }
   clamp(w: number, h: number) {
     const vw = w / this.z, vh = h / this.z;
-    const pad = 48;
+    const pad = 16;
     this.x = vw >= WORLD_PX_W ? WORLD_PX_W / 2 : Math.min(WORLD_PX_W - vw / 2 + pad, Math.max(vw / 2 - pad, this.x));
     this.y = vh >= WORLD_PX_H ? WORLD_PX_H / 2 : Math.min(WORLD_PX_H - vh / 2 + pad, Math.max(vh / 2 - pad, this.y));
   }

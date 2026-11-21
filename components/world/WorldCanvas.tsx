@@ -54,6 +54,7 @@ export default function WorldCanvas({ engine, onSelect, onCamera }: Props) {
       const R = r(); const dpr = R.dpr;
       if (pts.size === 1) {
         const dx = e.clientX - p.x, dy = e.clientY - p.y;
+        if (Math.abs(dx) + Math.abs(dy) > 2) engine.follow = false;
         moved += Math.abs(dx) + Math.abs(dy);
         R.cam.x -= (dx * dpr) / R.cam.z; R.cam.y -= (dy * dpr) / R.cam.z; R.cam.clamp(R.w, R.h);
         report();

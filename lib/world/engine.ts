@@ -21,6 +21,7 @@ export class WorldEngine {
   renderer: Renderer | null = null;
   mode: TimeMode = { kind: 'live' };
   selected = -1;
+  follow = false;
   eyes: Eye[] = [];
   bubbleSource: ((v: View) => Bubble[]) | null = null;
   font = '"Courier New", monospace';
@@ -61,6 +62,10 @@ export class WorldEngine {
     const loop = () => {
       this.raf = requestAnimationFrame(loop);
       const v = this.view(); if (!v || !this.renderer) return;
+      if (this.follow && this.selected >= 0) {
+        const p = v.poses.find((q) => q.uid === this.selected);
+        if (p) { const cam = this.renderer.cam; cam.x += (p.x / 16 - cam.x) * 0.12; cam.y += (p.y / 16 - 8 - cam.y) * 0.12; cam.clamp(this.renderer.w, this.renderer.h); }
+      }
       this.renderer.draw({
         tw: v.tw, H: v.H, minuteOfDay: v.minuteOfDay, cur: v.cur, poses: v.poses, profiles: v.profiles,
         bubbles: this.bubbleSource ? this.bubbleSource(v) : [], eyes: this.eyes, selected: this.selected,

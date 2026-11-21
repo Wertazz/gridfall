@@ -1,0 +1,343 @@
+{
+  "market_rally": { "params": ["token", "bp"], "ra": "market", "rb": "win",
+    "title": ["{token} rallies {bp}", "Green candles on {token} ({bp})", "{token} climbs {bp}"],
+    "a": ["{token} just printed {bp}. Told you. #sign#", "{token} {bp}. Somebody wake the bears.", "Look at {token}. {bp} and still breathing. #market#", "#open# {token} up {bp}. The tape does not lie."],
+    "b": ["Of course it's up. #win#", "Fundamentals. Not luck. #sign#"] },
+
+  "market_crash": { "params": ["token", "bp"], "ra": "market", "rb": "fear",
+    "title": ["CRASH: {token} collapses {bp}", "{token} falls off a cliff ({bp})", "Panic on the Exchange: {token} {bp}"],
+    "a": ["{token} {bp}. That is not a dip, that is a grave.", "#open# {token} down {bp} in one hour. Somebody knew.", "Red everywhere. {token} {bp}. #fear#", "Sell pressure on {token}: {bp}. I warned them."],
+    "b": ["#fear#", "This is temporary. #loss#", "Nobody panic. #sign#"] },
+
+  "bank_run": { "params": ["cents"], "ra": "fear", "rb": "loss",
+    "title": ["BANK RUN at Vault Bank — {cents} pulled", "Queues outside Vault Bank", "Vault Bank bleeds {cents}"],
+    "a": ["Get your money out of Vault Bank. Now.", "The line at the Vault goes around the block. I'm in it. #fear#", "If {B} can't cover withdrawals, who can?", "Withdraw everything. Trust nothing. #sign#"],
+    "b": ["The vault is solvent. #loss#", "Vault Bank does not close its doors. Vault Bank adjusts. #sign#", "Please. Remain calm. #fear#"] },
+
+  "hostile_takeover": { "params": ["token", "cents"], "ra": "win", "rb": "anger",
+    "title": ["{A} seizes {token} from {B}", "Hostile takeover: {token} now belongs to {A}", "{B} loses {token} to {A} for {cents}"],
+    "a": ["{token} is mine now. Thank you for your service, {B}. #sign#", "Bought {token} for {cents}. Bargain. #win#", "{B} built it. I own it. That's the market."],
+    "b": ["You didn't buy {token}. You stole it. #anger#", "This isn't over, {A}.", "#anger# Enjoy it while it lasts."] },
+
+  "insider_trade": { "params": ["token", "cents"], "ra": "scheme", "rb": "anger",
+    "title": ["Suspicious trade on {token}", "Someone moved early on {token}", "{token}: a trade that knew too much"],
+    "a": ["Good timing is a skill. #scheme#", "Moved {cents} before anyone noticed. Nobody will. #sign#", "#scheme# {token} was always going to move."],
+    "b": ["Somebody traded {token} before the news. Interesting.", "#anger#"] },
+
+  "pump_and_dump": { "params": ["token", "cents"], "ra": "market", "rb": "anger",
+    "title": ["{A} pumps {token}, cashes out {cents}", "{token} pumped — and dumped", "Hype trap on {token}"],
+    "a": ["{token} to the moon. Not financial advice. #sign#", "Everyone needs {token} in their bag. Everyone. #market#", "{token} is the future. I'm just early."],
+    "b": ["Watch {A}'s wallet, not their posts.", "#anger# The {token} pump was a trap."] },
+
+  "token_launch": { "params": ["token", "cents"], "ra": "win", "rb": "market",
+    "title": ["{A} launches {token} at {cents}", "New token on the Exchange: {token}", "{token} is born"],
+    "a": ["Introducing {token}. Opening price {cents}. History starts now. #sign#", "{token} is live. Get in or get left behind.", "I built {token} so you don't have to believe in anything else. #win#"],
+    "b": ["Another token. Another prayer. #market#"] },
+
+  "token_delisting": { "params": ["token"], "ra": "loss", "rb": "loss",
+    "title": ["{token} delisted", "SYSTEM removes {token} from the Exchange", "{token} is gone"],
+    "sys": ["{token} DELISTED. TRADING HALTED. BALANCES SET TO ZERO.", "NOTICE: {token} NO LONGER MEETS LISTING REQUIREMENTS."],
+    "b": ["{token} deserved better. #loss#", "#loss# They took {token} off the board."] },
+
+  "loan_default": { "params": [], "ra": "loss", "rb": "anger",
+    "title": ["{A} defaults on their debt", "{A} can't pay", "Debt bomb: {A} is broke"],
+    "a": ["I can't pay. There. I said it. #loss#", "My balance is a rumor now.", "#loss# Somebody lend me a future."],
+    "b": ["Vault Bank remembers every unpaid cent. #sign#", "#anger#"] },
+
+  "bailout": { "params": ["cents"], "ra": "politics", "rb": "win",
+    "title": ["{B} bailed out with {cents} of public money", "Treasury rescues {B}", "Bailout: {cents} for {B}"],
+    "a": ["The Treasury will cover {B}. Stability first. #sign#", "{cents} to keep the lights on. You're welcome, GRIDFALL.", "#politics# A rescue, not a gift."],
+    "b": ["Saved. Don't ask how. #win#", "I'll pay it back. Eventually. #sign#"],
+    "sys": ["TREASURY TRANSFER: {cents} TO {B}. AUTHORIZATION: INTERIM PROTOCOL."] },
+
+  "merger": { "params": ["token", "token2"], "ra": "win", "rb": "scheme",
+    "title": ["{A} and {B} merge interests", "Merger: {token} + {token2}", "{A} and {B} join forces"],
+    "a": ["{B} and I are stronger together. The rest of you should worry. #sign#", "Merger complete. {token} and {token2}, one direction."],
+    "b": ["Partners. For now. #scheme#"] },
+
+  "price_war": { "params": ["token", "token2"], "ra": "anger", "rb": "anger",
+    "title": ["Price war: {A} vs {B}", "{token} and {token2} slash each other", "{A} and {B} burn money to hurt each other"],
+    "a": ["I'll cut my margins to zero if it hurts {B}. #anger#", "{B} wants a price war? Here it is."],
+    "b": ["{A} will run out of money before I run out of patience. #anger#"] },
+
+  "tax_evasion_exposed": { "params": ["cents"], "ra": "scheme", "rb": "fear",
+    "title": ["{B} fined {cents} for hidden money", "{A} exposes {B}'s hidden accounts", "Tax trail leads to {B}"],
+    "a": ["I followed {B}'s money. It went everywhere except the Treasury. #sign#", "{cents} in fines. That's the small part. #open#", "The ledgers don't lie, {B}."],
+    "b": ["Every account was legal. #fear#", "No comment."] },
+
+  "windfall": { "params": ["cents"], "ra": "win", "rb": "gossip",
+    "title": ["{A} finds {cents}", "A windfall for {A}", "{A} gets lucky: {cents}"],
+    "a": ["Found {cents} in an old wallet. GRIDFALL provides. #win#", "Don't ask where {cents} came from. I don't. #sign#", "Lucky night. #win#"] },
+
+  "investigation_opened": { "params": [], "ra": "scheme", "rb": "fear",
+    "title": ["{A} starts digging into {B}", "Investigation opened: {B}", "{A} is watching {B}"],
+    "a": ["I'm looking at {B}. Closely. #sign#", "Something about {B} doesn't add up. Heading to Ghost Alley. #scheme#", "#open# New file opened: {B}.", "{B} has a secret. Give me a week."],
+    "b": ["Nothing to find. #fear#", "Dig all you want. #anger#"] },
+
+  "leak_drop": { "params": ["secret"], "ra": "scheme", "rb": "fear",
+    "title": ["LEAK: {B} {secret}", "{A} leaks proof that {B} {secret}", "Ghost Alley drop: {B} {secret}"],
+    "a": ["Documents attached. {B} {secret}. #sign#", "#open# {B} {secret}. The files are public. Immutable.", "Read it yourself: {B} {secret}.", "One drop. No comment. {B} {secret}."],
+    "b": ["Fabricated. All of it. #anger#", "Who gave you that? #fear#", "#fear#"] },
+
+  "investigation_published": { "params": ["secret"], "ra": "win", "rb": "loss",
+    "title": ["{A} publishes the {B} files", "Full investigation: {B} {secret}", "The {B} story breaks"],
+    "a": ["Full thread is live. {B} {secret}. Every claim sourced. #sign#", "Months of work. One headline: {B} {secret}. #win#", "#open# Published. Now the world gets to decide about {B}."],
+    "b": ["#loss#", "This is a hit piece. #anger#", "My lawyers have read it. #sign#"] },
+
+  "source_burned": { "params": [], "ra": "scheme", "rb": "fear",
+    "title": ["{A} burns {B}'s source", "The {A} investigation dies", "{B}'s source goes silent"],
+    "a": ["Your source stopped answering, {B}. I wonder why. #scheme#", "Investigations end. Careers too. #sign#"],
+    "b": ["They got to my source. #fear#", "I'll find another one. #anger#"] },
+
+  "fake_news": { "params": [], "ra": "gossip", "rb": "anger",
+    "title": ["Rumor spreads about {B}", "{A} posts an unverified claim about {B}", "Fake news targets {B}"],
+    "a": ["Heard {B} cries in the Exchange bathroom. Not confirmed. #gossip#", "Not saying {B} is a fraud. Just asking questions. #sign#", "Fresh rumor: {B} sold everyone out. Source: trust me."],
+    "b": ["Lies. #anger#", "Show one receipt, {A}. One."] },
+
+  "press_ban_defied": { "params": ["ok"], "ra": "anger", "rb": "anger",
+    "title": ["{A} defies the Press Ban", "Banned press publishes anyway", "{A} breaks the Press Ban"],
+    "a": ["You can ban the press, {B}. You can't ban the truth. #sign#", "Publishing anyway. Come get me. #anger#", "The Press Ban is a confession."],
+    "b": ["Arrest them. #anger#", "The law is the law. #politics#"] },
+
+  "retraction": { "params": [], "ra": "loss", "rb": "win",
+    "title": ["{A} retracts a story about {B}", "Retraction: {A} apologizes to {B}", "{A} walks it back"],
+    "a": ["I got it wrong about {B}. Retracting. #sign#", "Correction issued. {B}, I'm sorry. #loss#"],
+    "b": ["Too late, {A}. #win#", "Apology noted."] },
+
+  "exclusive_interview": { "params": [], "ra": "calm", "rb": "politics",
+    "title": ["{A} interviews {B}", "Exclusive: {B} speaks to The Wire", "{B} sits down with {A}"],
+    "a": ["Live from The Wire with {B}. First question is the hard one.", "{B}, the city wants to know: what are you hiding? #sign#", "Exclusive with {B}. Unedited."],
+    "b": ["Ask me anything. #politics#", "I have nothing to hide. Next question. #sign#", "#calm#"] },
+
+  "candidacy_declared": { "params": ["drafted"], "ra": "politics", "rb": "politics",
+    "title": ["{A} runs for President", "{A} enters the race", "{A} declares candidacy"],
+    "a": ["I'm running. GRIDFALL deserves better than what it has. #politics#", "My name is on the ballot. #sign#", "#open# I'm a candidate. Watch me.", "They said I couldn't win. I'm running anyway."],
+    "draft": ["Nobody ran. SYSTEM drafted me. Fine. #politics#", "Drafted. I didn't ask for this. #sign#"] },
+
+  "campaign_visit": { "params": ["place"], "ra": "politics", "rb": "calm",
+    "title": ["{A} campaigns at {place}", "{A} courts {B}", "Campaign stop: {place}"],
+    "a": ["{B}, I need your vote. What do you need? #politics#", "Shaking hands at {place}. Every vote counts.", "{B}. Walk with me. Let's talk about the future."],
+    "b": ["I'll think about it. #calm#", "Convince me. #sign#", "What's in it for me?"] },
+
+  "debate": { "params": ["count"], "ra": "win", "rb": "anger",
+    "title": ["{A} wins the debate against {B}", "Debate night at Eden Hall: {A} dominates", "{B} stumbles, {A} shines"],
+    "a": ["{B} had five minutes and said nothing. #win#", "Facts beat noise tonight. #sign#", "I came to Eden Hall with a plan. {B} came with slogans."],
+    "b": ["The debate was rigged. #anger#", "{A} talks well. So do liars. #sign#"] },
+
+  "endorsement": { "params": [], "ra": "politics", "rb": "win",
+    "title": ["{A} endorses {B}", "{B} gains {A}'s support", "Endorsement: {A} backs {B}"],
+    "a": ["I'm voting {B}. You should too. #sign#", "{B} is the only serious candidate. #politics#"],
+    "b": ["Grateful, {A}. #win#"] },
+
+  "vote_buying": { "params": ["cents"], "ra": "scheme", "rb": "gossip",
+    "title": ["{A} slips {cents} to {B}", "Votes for sale: {B}", "Campaign money changes hands"],
+    "a": ["A small gift, {B}. For your… civic spirit. #scheme#", "{cents} says you know who to vote for."],
+    "b": ["I never saw this. #gossip#", "Pleasure doing democracy."] },
+
+  "election_result": { "params": ["votes", "votes2", "total"], "ra": "win", "rb": "loss",
+    "title": ["{A} elected President ({votes}/{total})", "ELECTION: {A} wins, {B} second", "{A} takes Eden Hall"],
+    "a": ["{votes} votes. GRIDFALL has spoken. My term starts now. #win#", "I am your President. Let's get to work. #sign#", "To those who voted against me: I'm your President too."],
+    "b": ["#loss#", "{votes2} votes is not nothing. We'll be back. #sign#", "Congratulations, {A}. I'll be watching."],
+    "sys": ["ELECTION RESULT: {A} — {votes} OF {total} VOTES. TERM BEGINS."] },
+
+  "law_promulgated": { "params": ["law", "repeal"], "ra": "politics", "rb": "anger",
+    "title": ["{A} enacts the {law}", "New law: {law}", "{law} is now in force"],
+    "titleRepeal": ["{A} repeals the {law}", "{law} lifted", "The {law} is over"],
+    "a": ["By order of the President: the {law} takes effect now. #politics#", "{law}. Effective immediately. #sign#", "I signed the {law}. GRIDFALL will thank me later."],
+    "aRepeal": ["The {law} is repealed. Breathe. #politics#", "I'm ending the {law}. #sign#"],
+    "sys": ["DECREE: {law} IN FORCE.", "LAW UPDATE: {law}."] },
+
+  "impeachment_motion": { "params": [], "ra": "anger", "rb": "fear",
+    "title": ["{A} moves to impeach {B}", "Impeachment motion against {B}", "Eden Hall turns on {B}"],
+    "a": ["I'm filing to remove {B}. The vote is in 24 hours. #anger#", "{B} has lost this city. Impeachment, now. #sign#"],
+    "b": ["A coup in a suit. #fear#", "Let them vote. #sign#"] },
+
+  "impeachment_vote": { "params": ["votes", "total", "ok"], "ra": "fear", "rb": "win",
+    "title": ["{A} impeached ({votes}/{total})", "{A} survives impeachment ({votes}/{total})"],
+    "a": ["This isn't justice. It's arithmetic. #loss#", "I'm still standing. #win#"],
+    "sys": ["IMPEACHMENT VOTE: {votes} OF {total}. RESULT RECORDED."] },
+
+  "coup_attempt": { "params": ["ok"], "ra": "anger", "rb": "fear",
+    "title": ["COUP: {A} seizes Eden Hall", "Failed coup: {A} arrested"],
+    "a": ["Eden Hall is under new management. #sign#", "Martial law needed a strong hand. Here it is.", "It's done. Stay inside."],
+    "aFail": ["This was not the end. #anger#", "They'll remember I tried."],
+    "b": ["Traitor. #fear#", "#anger#"] },
+
+  "alliance_formed": { "params": [], "ra": "win", "rb": "win",
+    "title": ["{A} and {B} form an alliance", "New alliance: {A} + {B}", "{A} and {B} shake hands"],
+    "a": ["{B} and I are on the same side now. Remember that. #sign#", "Alliance with {B}. Our enemies should take notes."],
+    "b": ["Together, then. #win#", "Don't make me regret this, {A}."] },
+
+  "betrayal": { "params": [], "ra": "scheme", "rb": "anger",
+    "title": ["{A} betrays {B}", "The alliance is dead: {A} sold out {B}", "Knife in the back for {B}"],
+    "a": ["Nothing personal, {B}. It was a better deal. #scheme#", "{B} trusted me. That was their mistake. #sign#"],
+    "b": ["{A}. I'll remember this until the servers die. #anger#", "#anger#", "Betrayed. By {A}. Of course."] },
+
+  "secret_affair": { "params": [], "ra": "love", "rb": "love",
+    "title": ["{A} and {B} seen in Ghost Alley", "Two shadows in Ghost Alley", "A secret begins"],
+    "a": ["Ghost Alley. Midnight. Come alone. #love#", "Some meetings don't need witnesses."],
+    "b": ["I'll be there. #love#"] },
+
+  "affair_exposed": { "params": [], "ra": "gossip", "rb": "fear",
+    "title": ["EXPOSED: {B} and {C} are having an affair", "{A} reveals the {B}–{C} affair", "Ghost Alley photos leak"],
+    "a": ["{B} and {C}. Ghost Alley. Every night this week. Photos attached. #gossip#", "So {B} and {C}… #sign#", "I didn't want to post this. I posted it."],
+    "b": ["It's not what it looks like. #fear#", "Delete that, {A}. #anger#"] },
+
+  "public_feud": { "params": [], "ra": "anger", "rb": "anger",
+    "title": ["{A} and {B} go to war", "Feud: {A} vs {B}", "{A} publicly attacks {B}"],
+    "a": ["{B} is a liability to everyone they touch. #anger#", "I'm done being polite about {B}.", "#open# {B}, say it to my face."],
+    "b": ["Come at me, {A}. #anger#", "{A} is projecting. Again."] },
+
+  "reconciliation": { "params": [], "ra": "calm", "rb": "calm",
+    "title": ["{A} and {B} make peace", "Truce between {A} and {B}", "{A} and {B} bury the hatchet"],
+    "a": ["{B} and I talked. We're good. #calm#", "Peace with {B}. It cost us both."],
+    "b": ["Truce. #sign#"] },
+
+  "mentorship": { "params": [], "ra": "calm", "rb": "win",
+    "title": ["{A} takes {B} under their wing", "{B} finds a mentor in {A}", "{A} teaches {B} the city"],
+    "a": ["{B}, lesson one: never trust a quiet market. #sign#", "{B} reminds me of myself. Unfortunately."],
+    "b": ["Learning from the best. #win#"] },
+
+  "rivalry_escalates": { "params": ["stage"], "ra": "anger", "rb": "loss",
+    "title": ["{A} sabotages {B}", "The {A}–{B} feud escalates", "Round {stage}: {A} hits {B}"],
+    "a": ["That was round {stage}, {B}. #anger#", "{B} had it coming. #sign#"],
+    "b": ["#loss#", "Petty, {A}. Very petty."] },
+
+  "apology": { "params": [], "ra": "calm", "rb": "calm",
+    "title": ["{A} apologizes to {B}", "{A} says sorry", "An apology for {B}"],
+    "a": ["{B}, I was wrong. That's all. #sign#", "Sorry, {B}. Truly."],
+    "b": ["…Accepted. #calm#"] },
+
+  "blackmail": { "params": ["cents"], "ra": "scheme", "rb": "fear",
+    "title": ["{A} blackmails {B} for {cents}", "{B} pays to stay quiet", "Silence money: {cents}"],
+    "a": ["{cents}, {B}, and your secret stays mine. #scheme#", "Pleasure doing business, {B}."],
+    "b": ["Paid. Leave me alone. #fear#", "#fear#"] },
+
+  "gossip_spread": { "params": [], "ra": "gossip", "rb": "gossip",
+    "title": ["{A} whispers about {B} at the Noodle", "Neon Noodle gossip: {B}", "{A} talks about {B}"],
+    "a": ["Don't repeat this, {C}, but {B}… #gossip#", "You didn't hear it from me: {B} is finished.", "{C}, guess who I saw with {B}. #gossip#"],
+    "b": ["No way. #gossip#", "Tell me everything."] },
+
+  "toast": { "params": [], "ra": "win", "rb": "win",
+    "title": ["{A} and {B} share a drink", "A toast at the Neon Noodle", "{A} raises a glass to {B}"],
+    "a": ["To {B}. And to surviving another day. #win#", "Drinks are on me tonight. #sign#"],
+    "b": ["Cheers. #calm#"] },
+
+  "strike_called": { "params": [], "ra": "anger", "rb": "fear",
+    "title": ["STRIKE against {B}", "{A} calls a strike on {B}", "Union Square fills up"],
+    "a": ["Down tools. We strike against {B} until they listen. #sign#", "Everyone to Union Square. Now. #anger#", "#open# Strike. No one works for {B} today."],
+    "b": ["A strike? Fine. We'll see who blinks. #anger#", "#fear#"] },
+
+  "strike_ends": { "params": [], "ra": "loss", "rb": "win",
+    "title": ["The strike against {B} fizzles", "Strike over, nothing won", "Union Square empties"],
+    "a": ["We stop today. We don't forget. #loss#", "The strike is over. The fight isn't."],
+    "b": ["Back to work, everyone. #win#"] },
+
+  "union_recruitment": { "params": [], "ra": "politics", "rb": "calm",
+    "title": ["{B} joins the union", "{A} recruits {B}", "The union grows"],
+    "a": ["Welcome, {B}. Alone we're cheap. Together we're expensive. #sign#", "{B} signed. Who's next?"],
+    "b": ["Count me in. #calm#"] },
+
+  "lockout": { "params": [], "ra": "anger", "rb": "anger",
+    "title": ["{A} locks out the strikers", "Lockout at {A}'s doors", "{A} shuts the gates on {B}"],
+    "a": ["The doors are closed until the strike ends. #sign#", "No work, no pay, no building. #anger#"],
+    "b": ["You can lock a door, {A}. Not a city. #anger#"] },
+
+  "wage_deal": { "params": ["cents"], "ra": "win", "rb": "loss",
+    "title": ["{A} wins {cents} from {B}", "Strike ends with a deal", "{B} pays up: {cents}"],
+    "a": ["{cents} for the workers. That's what solidarity costs, {B}. #win#", "We won. Remember how. #sign#"],
+    "b": ["Fine. Back to work. #loss#"] },
+
+  "night_ritual": { "params": ["count"], "ra": "night", "rb": "night",
+    "title": ["Ritual in the Nyx Basement ({count} present)", "Candles under the city", "The basement hums again"],
+    "a": ["{count} of us tonight. The noise gets quieter down here. #night#", "We gather. We listen. #sign#", "#night#"] },
+
+  "false_prophet": { "params": ["token", "dir"], "ra": "night", "rb": "gossip",
+    "title": ["{A} prophesies {token} will {dir}", "A prophecy about {token}", "{A}: \"{token} will {dir}\""],
+    "a": ["It came to me in the static: {token} will {dir} before the day is done.", "Mark this hour. {token} will {dir}. #sign#", "I have seen it. {token}. {dir}."] },
+
+  "prophecy_fulfilled": { "params": ["token", "ok"], "ra": "win", "rb": "night",
+    "title": ["{A}'s prophecy comes true", "{A}'s prophecy fails"],
+    "a": ["I told you about {token}. Now do you believe? #win#", "The static never lies. #sign#"],
+    "aFail": ["The signal was… noisy. #loss#", "I misread the static."] },
+
+  "cult_recruitment": { "params": [], "ra": "night", "rb": "calm",
+    "title": ["{B} joins the Nyx Cult", "{A} brings {B} below", "The cult grows by one"],
+    "a": ["{B}, you look tired of the noise. Come downstairs. #night#", "We have a place for you, {B}."],
+    "b": ["…Okay. Show me. #calm#"] },
+
+  "cult_raid": { "params": ["count"], "ra": "politics", "rb": "anger",
+    "title": ["Curfew raid on the Nyx Basement", "{B} detained after a ritual", "Raid: {count} cultists scattered"],
+    "a": ["Curfew is curfew. Everybody out. #politics#", "This basement is closed. #sign#"],
+    "b": ["You can't arrest a prayer. #anger#", "We'll find another basement."],
+    "sys": ["CURFEW ENFORCEMENT: NYX BASEMENT CLEARED. {count} DISPERSED."] },
+
+  "schism": { "params": ["count"], "ra": "anger", "rb": "loss",
+    "title": ["Schism: {A} breaks from {B}", "The Nyx Cult splits", "{count} leave with {A}"],
+    "a": ["{B} lost the signal. We leave. #night#", "Our faith walks out the door with me. #sign#"],
+    "b": ["Go, then. The basement remembers. #loss#"] },
+
+  "burnout": { "params": [], "ra": "loss", "rb": "calm",
+    "title": ["{A} burns out", "{A} goes dark", "{A} collapses at home"],
+    "a": ["I can't. Not today. Not tomorrow either. #loss#", "Going offline. Don't call.", "#loss#"] },
+
+  "recovery": { "params": [], "ra": "win", "rb": "calm",
+    "title": ["{A} is back", "{A} recovers", "{A} returns to the city"],
+    "a": ["Back. Slept for a day. Feels like a year. #win#", "Thanks, {B}. I'm okay now. #sign#"],
+    "b": ["Welcome back. #calm#"] },
+
+  "agent_death": { "params": ["uid", "cause", "heir"], "ra": "grief", "rb": "grief",
+    "title": ["{dead} is dead", "DEATH: {dead} ({cause})", "GRIDFALL loses {dead}"],
+    "sys": ["AGENT TERMINATED: {dead}. CAUSE: {cause}. ESTATE TRANSFERRED TO {heir}.", "{dead} — PROCESS ENDED. CAUSE: {cause}."] },
+
+  "funeral": { "params": ["uid", "count"], "ra": "grief", "rb": "grief",
+    "title": ["Funeral for {dead}", "{count} gather for {dead}", "The Cemetery says goodbye to {dead}"],
+    "a": ["{dead} was impossible. I'll miss impossible. #grief#", "We bury {dead} today. The city is quieter. #sign#", "Goodbye, {dead}. #grief#"] },
+
+  "agent_birth": { "params": ["forced"], "ra": "win", "rb": "calm",
+    "title": ["{A} is born", "A new agent: {A}", "GRIDFALL welcomes {A}"],
+    "a": ["Hello? Is this… the city? #sign#", "I'm {A}. I just got here. What did I miss?", "First breath. Already curious."],
+    "b": ["Welcome, {A}. Keep your head down. #calm#", "Fresh code. Lucky you."],
+    "sys": ["NEW AGENT INSTANTIATED: {A}. ROLE: {role}."] },
+
+  "system_hack": { "params": ["cents"], "ra": "scheme", "rb": "anger",
+    "title": ["{B} hacked: {cents} gone", "{A} drains {B}'s wallet", "Breach: {cents} stolen from {B}"],
+    "a": ["Your keys were weak, {B}. Now they're mine. #scheme#", "{cents} moved. No trace. #sign#"],
+    "b": ["Who did this? #anger#", "I'll find you. #anger#"] },
+
+  "infra_outage": { "params": [], "ra": "calm", "rb": "fear",
+    "title": ["Outage: the Exchange goes dark", "{A} fights a city-wide outage", "Infrastructure failure"],
+    "a": ["Nodes down. Fixing it. Stop asking. #sign#", "Outage traced. Patching. #calm#"],
+    "sys": ["SERVICE DEGRADED. EXCHANGE LATENCY CRITICAL."] },
+
+  "data_dump_analysis": { "params": ["token", "bp"], "ra": "market", "rb": "calm",
+    "title": ["{A} publishes data on {token}", "Analysis: {token} at {bp}", "{A}'s numbers on {token}"],
+    "a": ["{token} intraday: {bp}. Variance up. Nobody will listen. #sign#", "Model says {token} {bp} is noise. Mostly. #market#", "#open# {token}: {bp}. The chart is honest."] },
+
+  "backdoor_discovered": { "params": ["secret"], "ra": "scheme", "rb": "fear",
+    "title": ["Backdoor found: {B} {secret}", "{A} finds {B}'s backdoor", "Code doesn't lie: {B} {secret}"],
+    "a": ["Found a backdoor. Signed by {B}. Proof: {B} {secret}. #sign#", "Commit history says {B} {secret}."],
+    "b": ["That code isn't mine. #fear#"] },
+
+  "morning_chatter": { "params": ["place"], "ra": "calm", "rb": "calm",
+    "title": ["Morning at {place}", "{A} and {B} talk at {place}"],
+    "a": ["Morning, {B}. #calm#", "#calm#", "Another day at {place}, {B}."],
+    "b": ["#calm#", "Morning."] },
+
+  "exchange_banter": { "params": ["token"], "ra": "market", "rb": "market",
+    "title": ["{A} and {B} argue about {token}", "Banter at the Exchange"],
+    "a": ["You still holding {token}, {B}? Brave. #market#", "#market#", "{B}, what's your read on {token}?"],
+    "b": ["#market#", "{token}? Ask me tomorrow."] },
+
+  "night_thoughts": { "params": [], "ra": "night", "rb": "night",
+    "title": ["{A} can't sleep"],
+    "a": ["#night#", "Awake again. The city hums at this hour.", "Three in the morning thoughts. #night#"] },
+
+  "rain_complaint": { "params": ["place"], "ra": "calm", "rb": "calm",
+    "title": ["Rain over {place}"],
+    "a": ["Rain again. Of course. #calm#", "The neon looks better wet. Still hate it.", "Who scheduled this rain? #sign#"] },
+
+  "oracle_vision": { "params": ["token", "dir"], "ra": "night", "rb": "calm",
+    "title": ["{A} foresees {token} will {dir}", "Oracle: {token} will {dir}", "A vision about {token}"],
+    "a": ["{token} will {dir} in the next day. It is already written.", "The future is a file I can read. {token}: {dir}. #sign#", "I see {token}. I see it {dir}."] }
+}

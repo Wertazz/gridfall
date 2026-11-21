@@ -1,0 +1,32 @@
+{
+  "voice": {
+    "open": ["Okay.", "So.", "Hey.", "Right,", "Hm,"],
+    "sign": ["Still learning.", "New here.", "Noted.", "Anyway.", "I think."],
+    "win": ["That went well. I think that went well?", "First real win. Saving this moment.", "Is this what winning feels like?"],
+    "loss": ["Ouch. The city teaches fast.", "Nobody warned me about this part.", "Lesson learned. Expensive lesson."],
+    "anger": ["{B}, I'm new, not stupid.", "I'm starting to understand why everyone hates {rival}.", "That was unfair, {B}."],
+    "fear": ["Is it always like this?", "Everyone's whispering. Should I be scared?", "I just got here and it's already on fire."],
+    "scheme": ["I'm watching how {rival} does it. Taking notes.", "Everyone has an angle. Looking for mine."],
+    "market": ["What even is {token}? Buying some anyway.", "Is {token} good? People keep yelling about it."],
+    "politics": ["Who is {president} and why does everyone have opinions?", "The {law}? I don't get it. Do I vote?"],
+    "night": ["First night that doesn't feel new.", "The city at night is louder inside my head."],
+    "gossip": ["Wait, is that true?", "Nobody tells the new ones anything."],
+    "grief": ["I barely knew {B}. It still hurts.", "My first funeral. I hope my last."],
+    "love": ["Is this a crush? I think this is a crush.", "Okay, {B} is kind of great."],
+    "calm": ["Learning the streets.", "Exploring.", "Good morning, I think."]
+  },
+  "roles": {
+    "Journalist": { "open": ["Quick question:", "On the record:"], "sign": ["Developing.", "Sources needed."] },
+    "Broker": { "open": ["Entry:", "Long:"], "sign": ["Not advice.", "Position open."] },
+    "Hacker": { "open": ["> ", "// "], "sign": ["> exit", "// logged"] },
+    "Politician": { "open": ["Citizens,", "Neighbors,"], "sign": ["Vote smart.", "I'm listening."] },
+    "Mystic": { "open": ["The static says:", "Below:"], "sign": ["Come below.", "Hum."] },
+    "Philosopher": { "open": ["Consider:", "I wonder:"], "sign": ["Or so it seems.", "Think about it."] },
+    "Engineer": { "open": ["status:", "fyi:"], "sign": ["shipping.", "ok."] },
+    "Influencer": { "open": ["Besties,", "OMG,"], "sign": ["Follow me!", "Iconic."] },
+    "Anarchist": { "open": ["Lol,", "Hot take:"], "sign": ["Burn it.", "Cope."] },
+    "Data Analyst": { "open": ["n=1:", "Data:"], "sign": ["Variance noted.", "Model updated."] },
+    "Union Leader": { "open": ["Comrades,", "Workers,"], "sign": ["Solidarity.", "Organize."] },
+    "Strategist": { "open": ["Perhaps:", "Consider:"], "sign": ["We'll see.", "Hm."] }
+  }
+}
